@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PERSISTENT_DIRS=$XDG_STATE_HOME/browser-sessions
+AD_HOC_DIRS=/tmp/browser-sessions
+
+sessions=()
+adhocsessions=()
+
+if [[ -d "$PERSISTENT_DIRS" ]]; then
+	for d in "$PERSISTENT_DIRS"/*; do
+		[[ -d "$d" ]] || continue
+		sessions+=( "$d" )
+	done
+fi
+
+if [[ -d "$AD_HOC_DIRS" ]]; then
+	for d in "$AD_HOC_DIRS"/*; do
+		[[ -d "$d" ]] || continue
+		adhocsessions+=( "$d" )
+	done
+fi
+
+{
+	for d in "${sessions[@]}"; do
+		printf '%s\t- %s\n' "$d" "$(basename $d)"
+	done
+	for d in "${adhocsessions[@]}"; do
+		printf '%s\t%s\n' "$d" "$(basename $d)"
+	done
+} \
+| fzf \
+	--with-nth=2 \
+	--delimiter='\t' \
+	--preview 'echo {1}' \
+	--reverse \
+	--print-query \
+| awk -v ad="$AD_HOC_DIRS/" '
+	NR == 1 { first = $0 }
+	NR == 2 { second = $0 }
+	END {
+		if (second != "") {
+			print second
+	} else if (first != "") {
+			print ad first
+		} else {
+			exit 1
+		}
+	}
+' \
+| awk -v browser="/usr/bin/chromium --ozone-platform=wayland --use-gl=egl --enable-features=VaapiVideoDecoder --disable-features=UseChromeOSDirectVideoDecoder --restore-last-session --user-data-dir=" -F'\t' '{print browser $1}'

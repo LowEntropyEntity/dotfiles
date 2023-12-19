@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+XDG_DIRS="${XDG_DATA_HOME:-}:${XDG_DATA_DIRS:-}"
+desktop_files=()
+
+IFS=':' read -ra dirs <<< "$XDG_DIRS"
+for d in "${dirs[@]}"; do
+	if [[ -d "$d/applications" ]]; then
+		for f in "$d"/applications/*.desktop; do
+			[[ -e "$f" ]] || continue
+			desktop_files+=( "$f" )
+		done
+	fi
+done
+
+{
+	for f in "${desktop_files[@]}"; do
+		if rg -q '^NoDisplay=true$' "$f"; then
+			continue
+		fi
+
+		exec_cmd="$(rg '^Exec=' "$f" | head -n1 | sed 's/^Exec=//')"
+		name_cmd="$(rg '^Name=' "$f" | head -n1 | sed 's/^Name=//')"
+
+		[[ -z "$exec_cmd" || -z "$name_cmd" ]] && continue
+
+		printf '%s\t%s\n' "$exec_cmd" "$name_cmd"
+	done
+}

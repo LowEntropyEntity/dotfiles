@@ -1,0 +1,17 @@
+{
+	"features": [
+		{
+			"id": "ghcr.io/duduribeiro/devcontainer-features/neovim:1",
+			"selected": true,
+			"options": {}
+		},
+		{
+			"id": "ghcr.io/devcontainers/features/node:1",
+			"options": {}
+		},
+		{
+			"id": "ghcr.io/nils-geistmann/devcontainers-features/zsh:0",
+			"options": {}
+		}
+	]
+}

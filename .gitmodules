@@ -1,0 +1,33 @@
+[submodule ".tmux/plugins/tpm"]
+	path = .tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm.git
+	ignore = dirty
+[submodule ".config/alacritty/catppuccin"]
+	path = .config/alacritty/catppuccin
+	url = https://github.com/catppuccin/alacritty.git
+	ignore = dirty
+[submodule ".config/waybar/catppuccin"]
+	path = .config/waybar/catppuccin
+	url = https://github.com/catppuccin/waybar.git
+	ignore = dirty
+[submodule ".oh-my-zsh"]
+	path = .oh-my-zsh
+	url = https://github.com/ohmyzsh/ohmyzsh.git
+	ignore = dirty
+[submodule ".config/wofi/wofi"]
+	path = .config/wofi/wofi
+	url = https://github.com/quantumfate/wofi.git
+	ignore = dirty
+[submodule ".config/wofi/catppuccin"]
+	path = .config/wofi/catppuccin
+	url = https://github.com/quantumfate/wofi.git
+	ignore = dirty
+[submodule ".config/eza/eza-themes"]
+	path = .config/eza/eza-themes
+	url = https://github.com/eza-community/eza-themes.git
+[submodule ".src/aur.archlinux.org/yay"]
+	path = .src/aur.archlinux.org/yay
+	url = https://aur.archlinux.org/yay.git
+[submodule ".oh-my-zsh-custom/plugins/fzf-tab"]
+	path = .oh-my-zsh-custom/plugins/fzf-tab
+	url = https://github.com/Aloxaf/fzf-tab

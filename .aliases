@@ -1,0 +1,121 @@
+alias cd='pushd > /dev/null'
+alias p='popd'
+alias ..='pushd ..'
+alias ...='pushd ../..'
+alias ....='pushd ../../..'
+
+if command -v eza &>/dev/null; then
+	alias l='eza -1 --classify'
+	alias lr='eza -1 -R --classify'
+	alias la='eza -1 -a --classify'
+	alias lar='eza -1 -a -R --classify'
+	alias ll='eza -l --classify'
+	alias llr='eza -l -R --classify'
+	alias lla='eza -l -a --classify'
+	alias llar='eza -l -a -R --classify'
+else
+	alias l='ls -1FG'
+	alias lr='ls -1FGR'
+	alias la='ls -1AFG'
+	alias lar='ls -1AFGR'
+	alias ll='ls -lFG'
+	alias llr='ls -lFGR'
+	alias lla='ls -lAFG'
+	alias llar='ls -lAFGR'
+fi
+
+alias dev-up="devcontainer up \
+	--additional-features \"\$(devcontainer-features-menu)\" \
+	--dotfiles-repository https://github.com/LowEntropyEntity/.dotfiles.git \
+	--dotfiles-target-path="~/.dotfiles" \
+	--dotfiles-install-command ".local/bin/install-dotfiles" \
+	--workspace-folder ."
+alias dev-clean='dev-up --remove-existing-container --build-no-cache'
+alias dev='devcontainer exec --workspace-folder .'
+alias dev-down='docker rm -f $(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")'
+
+### dotfiles and git
+alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias dot-lzg='lazygit --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout && echo "dotfiles synced successfully"'
+alias lzg='lazygit'
+
+### networking
+alias lsports='ss -tulpn'
+
+### datetime
+alias now='date +"%F %T"'
+
+### clipboard/sharing
+alias share-dir='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
+alias share-dir-git='(git ls-tree -r --name-only HEAD; echo; git ls-tree -r --name-only HEAD | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
+
+### security and auth
+alias totp='oathtool --base32 --totp'
+
+### aws and ai
+alias aws-login='aws sso login --profile'
+alias ai='chatgpt'
+
+alias docker-root='export DOCKER_HOST=$DOCKER_HOST_ROOT'
+alias docker-rootless='export DOCKER_HOST=$DOCKER_HOST_ROOTLESS'
+
+### toggle history
+alias stealth='set +o history'
+alias .stealth='set -o history'
+
+### use aliases while running with sudo
+alias sudo='sudo '
+
+### compression and archives
+alias gz='gzip'
+alias tar.gz='tar -czvf'
+alias tgz='tar -cvzf'
+alias .gz='gzip -d'
+alias .tar='tar -xvf'
+alias .tar.bz2='tar -xvjf'
+alias .tar.gz='tar -xvf'
+alias .tar.xz='tar -xvf'
+alias .tar.zst='tar --zstd -xvf'
+alias .tgz='tar -xvf'
+alias .zip='unzip'
+alias lstar='tar -tf'
+
+### temporary dirs and files
+alias tmp='cd $(mktemp -d)'
+alias tmp.='cd $(mktemp -d --tmpdir=./)'
+alias tmpfile='mktemp'
+alias tmpfile.='mktemp --tmpdir=./'
+alias vtemp='v $(tmpfile)'
+
+### remove and pop
+alias rm.='rm -frv $PWD && p'
+
+### audio testing
+alias speakers='speaker-test -t wav -c 2'
+
+### adb and mirroring
+alias adbmirror='adb shell screenrecord --output-format=h264 - | ffplay -framerate 60 -probesize 32 -sync video -'
+
+### dockerized redis
+alias redis='docker run --rm -p 6379:6379 redis'
+
+### tmux
+alias tmux-restore-off='touch ~/tmux_no_auto_restore'
+alias tmux-restore-on='rm ~/tmux_no_auto_restore 2> /dev/null || true'
+
+### editor
+if command -v nvim &>/dev/null; then
+	alias v='nvim'
+elif command -v vim &>/dev/null; then
+	alias v='vim'
+elif command -v vi &>/dev/null; then
+	alias v='vi'
+fi
+
+### vpn
+alias vpn-work='sudo openconnect $EMPLOYER_VPN_ENDPOINT -u $EMPLOYER_USERNAME --useragent=AnyConnect'
+
+### zsh reload
+alias zshrc='omz reload'
+

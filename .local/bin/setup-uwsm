@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+TARGET_DIR="$HOME/.local/bin"
+
+WRAPPER="$TARGET_DIR/uwsm-wrapper"
+
+commands=("code" "postman" "slack")
+
+for cmd in "${commands[@]}"; do
+	link="$TARGET_DIR/$cmd"
+	if [ -e "$link" ] || [ -L "$link" ]; then
+		echo "removing existing file: $link"
+		rm -f "$link"
+	fi
+	ln -s "$WRAPPER" "$link"
+	echo "created symlink for '$cmd' -> $WRAPPER"
+done

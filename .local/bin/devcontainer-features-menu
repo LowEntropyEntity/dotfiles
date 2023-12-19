@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+CONFIG_FILE="${XDG_CONFIG_HOME}/devcontainers/config.json"
+
+fzf_input=$(jq -r '.features | sort_by(if .selected then 0 else 1 end) | .[] | "\(.selected) \(.id) \(.options | @json)"' "$CONFIG_FILE" \
+| while read -r selected id opts; do
+	shortName=$(basename "$id")
+	prefix=""
+	[ "$selected" = "true" ] && prefix="*"
+	echo -e "${prefix}${shortName}\t${id}\t${opts}"
+done)
+
+initial_select_count=$(grep -c '^*' <<< "$fzf_input")
+bind_sequence=""
+for ((i = 0; i < "$initial_select_count"; ++i)); do
+	bind_sequence+="select+down+"
+done
+# remove last '+'
+bind_sequence="${bind_sequence%+}"
+
+selected_lines=$(echo "$fzf_input" \
+	| fzf --multi \
+		--with-nth=1 \
+		--reverse \
+		--delimiter="\t" \
+		--preview='echo {2}\\n\\noptions:\\n\\n{3}' \
+		--sync --bind "start:${bind_sequence}"
+) || {
+	# non-zero exit code if canceled
+	echo -n "{}"
+	exit 0
+}
+
+echo "$selected_lines" \
+| while IFS=$'\t' read -r shortName fullID opts; do
+	echo -n "\"$fullID\": $opts,"
+done \
+| sed '$ s/,$//' \
+| { echo -n "{ "; cat; echo -n " }"; }

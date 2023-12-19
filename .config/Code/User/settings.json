@@ -1,0 +1,43 @@
+{
+	"editor.renderWhitespace": "boundary",
+	"editor.insertSpaces": false,
+	"telemetry.telemetryLevel": "off",
+	"workbench.startupEditor": "none",
+	"keyboard.dispatch": "keyCode",
+	"cSpell.userWords": [
+		"popd",
+		"pushd"
+	],
+	"cSpell.customDictionaries": {
+
+	},
+	"CodeGPT.apiKey": "Google AI Studio",
+	"CodeGPT.Autocomplete.enabled": true,
+	"CodeGPT.Autocomplete.maxTokens": 500000,
+	"github.copilot.advanced": {},
+	"window.customTitleBarVisibility": "auto",
+	"github.copilot.editor.enableAutoCompletions": true,
+	"[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"editor.minimap.enabled": false,
+	"aws.telemetry": false,
+	"editor.fontFamily": "FiraCode Nerd Font Mono",
+	"dev.containers.defaultExtensions": [
+		"eamodio.gitlens",
+		"github.copilot",
+		"streetsidesoftware.code-spell-checker"
+	],
+	"dev.containers.dockerCredentialHelper": false,
+	"dev.containers.defaultFeatures": {
+		
+	},
+	"dev.containers.defaultExtensionsIfInstalledLocally": [
+		"GitHub.copilot",
+		"GitHub.copilot-chat",
+		"GitHub.vscode-pull-request-github",
+		"streetsidesoftware.code-spell-checker",
+		"vsce-toolroom.vscode-beautify"
+	],
+	"dev.containers.forwardWSLServices": false
+}

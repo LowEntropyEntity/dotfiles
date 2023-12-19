@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Smart Chromium
+Exec=$HOME/.smart-open-chromium %u
+Icon=chromium
+MimeType=x-scheme-handler/http;x-scheme-handler/https;
+

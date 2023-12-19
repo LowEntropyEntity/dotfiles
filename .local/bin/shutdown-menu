@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+OPTIONS=$(cat <<-END
+	hyprctl dispatch exec uwsm stop	restart hyprland
+	reboot	reboot
+	shutdown now	shutdown
+END
+)
+
+echo "$OPTIONS"

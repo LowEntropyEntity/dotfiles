@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+fzf \
+  --with-nth=2 \
+  --delimiter='\t' \
+  --preview 'echo {1}' \
+  --reverse \
+| awk -F'\t' '{print $1}'

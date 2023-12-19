@@ -1,0 +1,29 @@
+pkgname=devcontainers-cli-git
+pkgver=0.72.0
+pkgrel=1
+pkgdesc="Dev Container CLI"
+arch=('any')
+url="https://github.com/devcontainers/cli"
+license=('MIT')
+depends=('nodejs')
+makedepends=('git' 'yarn')
+source=("${pkgname%-git}::git+https://github.com/devcontainers/cli.git#tag=v${pkgver}")
+sha256sums=('b50b613c942c5df74a15cd7f351cc90cf8a545b0d98e4b18289219788eb92da6')
+
+pkgver() {
+	cd "$srcdir/${pkgname%-git}"
+	printf "%s" "$(git describe --tags | tr - . | sed 's/^v//')"
+}
+
+build() {
+	cd "$srcdir/${pkgname%-git}"
+	yarn
+	yarn compile
+	yarn package
+}
+
+package() {
+	cd "$srcdir/${pkgname%-git}"
+	npm install -g --prefix "$pkgdir"/usr "${pkgname%-git}-${pkgver}".tgz
+	chown -R root:root "$pkgdir"
+}

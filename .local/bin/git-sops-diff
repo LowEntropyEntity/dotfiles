@@ -1,0 +1,84 @@
+#!/bin/bash
+
+TMPDIR=$(mktemp -d)
+TIMESTAMP=$(date -u +"%H:%M:%S.%3N")
+
+OPERATION=$1
+SOPS_TYPE=$2
+FILENAME="${3:-}"
+
+if [ -f "${FILENAME}" ]; then
+	if git cat-file -e HEAD:${FILENAME} >/dev/null 2>&1; then
+		FILE_OPERATION=modify
+	else
+		FILE_OPERATION=other # add, rm, mv
+	fi
+fi
+
+case "$OPERATION" in
+	clean)
+		SOPS_OPERATION="encrypt"
+		;;
+	smudge)
+		SOPS_OPERATION="decrypt"
+		;;
+	diff)
+		cat "${FILENAME}" # file has already gone through smudge filter
+		exit 0
+		;;
+	*)
+		exit 1
+		;;
+esac
+
+if [ ! -t 0 ]; then
+	STDIN_TMP_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_stdin)
+	cat > "${STDIN_TMP_FILE}"
+else
+	exit 1
+fi
+
+TYPE_ARGS="--input-type ${SOPS_TYPE} --output-type ${SOPS_TYPE}"
+if [ "${SOPS_TYPE}" = "inferred" ]; then
+	TYPE_ARGS="--filename-override ${FILENAME}"
+fi
+SOPS_COMMAND="sops ${SOPS_OPERATION} ${TYPE_ARGS} /dev/stdin"
+
+STDOUT_LOG_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_stdout_log)
+STDERR_LOG_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_stderr_log)
+cat "${STDIN_TMP_FILE}" | eval "${SOPS_COMMAND}" 2>>"${STDERR_LOG_FILE}" > "${STDOUT_LOG_FILE}"
+
+case "${OPERATION}" in
+	smudge)
+		cat "${STDOUT_LOG_FILE}"
+		;;
+	clean)
+		case "$FILE_OPERATION" in
+			modify)
+				OLD_TMP_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_old)
+				GIT_CAT_FILE_COMMAND="git cat-file --filters HEAD:${FILENAME} > ${OLD_TMP_FILE}"
+				GIT_CAT_STDOUT_LOG_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_stdout_git_cat_log)
+				GIT_CAT_STDERR_LOG_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_stderr_git_cat_log)
+				eval "${GIT_CAT_FILE_COMMAND}" 2>>"${GIT_CAT_STDERR_LOG_FILE}" > "${GIT_CAT_STDOUT_LOG_FILE}"
+
+				COMPARE_COMMAND="! cmp -s \"${OLD_TMP_FILE}\" \"${STDIN_TMP_FILE}\""
+				if eval "${COMPARE_COMMAND}"; then
+					# file has changed
+					cat "${STDOUT_LOG_FILE}"
+				else
+					OLD_CLEAN_TMP_FILE=$(mktemp --tmpdir=${TMPDIR} --suffix=_old_clean)
+					git cat-file -p HEAD:${FILENAME} > "${OLD_CLEAN_TMP_FILE}"
+					cat "${OLD_CLEAN_TMP_FILE}"
+				fi
+				;;
+			*)
+				cat "${STDOUT_LOG_FILE}"
+				;;
+		esac
+		;;
+	*)
+		exit 1
+		;;
+esac
+
+exit 0

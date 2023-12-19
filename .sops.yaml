@@ -1,0 +1,10 @@
+creation_rules:
+  - pgp: >-
+      1F86464D595F2DCD5F6029B6E81D523E5DD412E2
+stores:
+  json:
+    indent: 2
+  json_binary:
+    indent: 2
+  yaml:
+    indent: 2

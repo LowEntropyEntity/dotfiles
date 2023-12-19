@@ -1,0 +1,6 @@
+*.enc.* diff=sops-diff filter=sops-filter-inferred
+*.enc diff=sops-diff filter=sops-filter-binary
+
+enc/** diff=sops-diff filter=sops-filter-binary
+work/** diff=sops-diff filter=sops-filter-binary
+

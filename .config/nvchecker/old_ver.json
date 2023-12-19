@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "data": {
+    "devcontainers-cli": {
+      "version": "20241219.181949",
+      "revision": "e0598db3bf9f7ea88a752366e689c6c884751cd9",
+      "url": "https://github.com/devcontainers/cli/commit/e0598db3bf9f7ea88a752366e689c6c884751cd9"
+    }
+  }
+}

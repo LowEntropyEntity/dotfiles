@@ -1,0 +1,13 @@
+nvchecker_updates() {
+	local output
+	output=$(script -qfc "nvchecker" /dev/null 2>/dev/null)
+
+	if [[ -n "$output" ]]; then
+		echo -e "\e[1;35mnvchecker:\e[0m"
+		echo "$output"
+		echo -e "\n** run \e[96mnvtake [NAME ...]\e[0m or \e[96mnvtake --all\e[0m to acknowledge **"
+	fi
+}
+
+nvchecker_updates
+
