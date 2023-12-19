@@ -1,0 +1,68 @@
+[alias]
+	# show alias
+	alias = config --get-regexp ^alias\\.
+
+	# execute shell script in repository's root directory
+	exec = "!exec "
+
+	# --force-with-lease is safer than --force in the case where someone's pushed after your last fetch
+	force-push = push --force-with-lease
+
+	# logs
+	# show commit logs as a directed acyclic graph
+	dag = log --graph --abbrev-commit --decorate --pretty='%C(auto)%h %d%C(reset) %s - %C(dim white)%ad %an%C(reset) %C(cyan)%G? %GS%C(reset)'
+	# dag of this node and its children
+	children = "!f() { COMMIT=`git rev-parse --short $1 2>/dev/null || git rev-parse --short HEAD`; git log --graph --oneline --decorate ^${COMMIT}^@ $(git rev-list --children --all --abbrev-commit | grep ^${COMMIT}) --format=oneline; }; f"
+	# dag of this node and its ancestors
+	ancestors = log --graph --format=oneline
+	# dag of this node and its descendants
+	descendants = "! git-descendants"
+	# show commit logs on a single line each
+	lg = log --pretty='%C(auto)%h %C(reset)%C(dim white)%ad%C(reset)%C(auto)%d%C(reset) %C(auto)%s%C(reset) %C(dim white)- %an%C(reset) %C(cyan)%G? %GS%C(reset)'
+	# show commit logs with a list of changed files
+	ll = lg --decorate --stat
+
+	# list and show stashed changes
+	stashes = "!git stash list | awk -F: '{ printf \"\\033[33m\"$0\"\\033[0m\\n\\n\"; system(\"git stash show \" $1); print \"\";}' #"
+
+	# show compact status
+	st = ! git status --short && echo "" && git stash list
+
+[commit]
+	gpgSign = true
+
+[core]
+	editor = nvim
+	fileMode = true
+
+[format]
+	pretty = %C(auto)%h %H %d%C(reset)%n%C(dim white)%an <%ae>%C(reset) %C(cyan)%G? %GS%C(reset)%n%C(dim white)%ad%C(reset)%n%n    %s%C(reset)%n
+
+[grep]
+	patternType = extended
+	lineNumber = true
+
+[init]
+	defaultBranch = main
+
+[log]
+	date = iso
+
+[push]
+	autoSetupRemote = true
+
+[stash]
+	showPatch = true
+	showStash = true
+
+[status]
+	showStash = true
+
+[user]
+	email = sean@sean.xyz
+	name = sean simonsen
+	signingkey = 0xE81D523E5DD412E2
+
+[includeIf "gitdir:~/sonos/"]
+	path = ~/.gitconfig-sonos
+

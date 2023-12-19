@@ -1,0 +1,51 @@
+alias cd='pushd > /dev/null'
+alias p='popd'
+
+alias aws-login='aws sso login --sso-session'
+
+alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
+
+alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout'
+
+alias l='ls -1FG'	# list file name only, slashes after directories, color, don't recurse
+alias la='ls -1AFG'	# list file name only, all entries, slashes after directories, color, don't recurse
+alias ll='ls -lFG'	# long format, slashes after directories, color, don't recurse
+alias lla='ls -lAFG'	# long format, all entries, slashes after directories, color, don't recurse
+
+alias now='\date +"%F %T"'
+
+alias nvidia-check='cat /boot/loader/entries/*.conf | grep nvidia &> /dev/null || echo "nvidia not found in /boot/loader/entries/*.conf, consider adding nvidia-drm.modeset=1"'
+
+alias findfile='find . | grep'	# find file by name
+
+alias stealth='set +o history'	# stop writing commands to history
+alias .stealth='set -o history'	# resume writing commands to history
+
+alias totp='oathtool --base32 --totp'
+
+alias sudo='sudo '	# makes aliases available in sudo
+
+alias gz='gzip'
+alias tar.gz='tar-gz'
+alias .tar='tar -xvf'
+alias .tar.gz='.tar'
+alias .tar.xz='.tar'
+alias .gz='gzip -d'
+
+alias tmp='cd $(mktemp -d)'
+alias tmp.='cd $(mktemp -d --tmpdir=./)'
+alias tmpfile='mktemp'
+alias tmpfile.='mktemp --tmpdir=./'
+
+alias rm.='rm -frv $(pwd) && p'
+alias srm='shred -u -z'
+
+alias speakers='speaker-test -t wav -c 2'
+
+alias adbmirror='adb shell screenrecord --output-format=h264 - | ffplay -framerate 60 -probesize 32 -sync video -'
+
+alias redis-start='docker run --rm -p 6379:6379 redis'
+
+alias vim='nvim'
+

@@ -1,0 +1,15 @@
+[submodule ".src/aur.archlinux.org/swaylock-effects"]
+	path = .src/aur.archlinux.org/swaylock-effects
+	url = https://aur.archlinux.org/swaylock-effects.git
+[submodule ".tmux/plugins/tpm"]
+	path = .tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm.git
+[submodule ".config/alacritty/catppuccin"]
+	path = .config/alacritty/catppuccin
+	url = https://github.com/catppuccin/alacritty.git
+[submodule ".config/waybar/catppuccin"]
+	path = .config/waybar/catppuccin
+	url = https://github.com/catppuccin/waybar.git
+[submodule ".oh-my-zsh"]
+	path = .oh-my-zsh
+	url = https://github.com/ohmyzsh/ohmyzsh.git

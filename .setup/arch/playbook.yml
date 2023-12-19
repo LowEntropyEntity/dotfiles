@@ -1,0 +1,305 @@
+---
+- hosts: localhost
+
+  vars_prompt:
+
+    - name: user
+      prompt: enter non-root user name
+      private: false
+
+    - name: user_password
+      prompt: enter user password
+
+    - name: user_password_confirm
+      prompt: re-enter user password to confirm
+
+  tasks:
+
+    - name: validate password
+      assert:
+        that:
+          - user_password == user_password_confirm
+
+    - name: pacman update
+      pacman:
+        update_cache: true
+        upgrade: true
+
+    - name: install base apps
+      pacman:
+        name:
+          - alsa-utils
+          - aws-cli-v2
+          - base-devel
+          - blueman
+          - bluez
+          - brightnessctl
+          - ccid
+          - docker
+          - docker-compose
+          - dolphin
+          - fzf
+          - gdb
+          - git
+          - gnupg
+          - hopenpgp-tools
+          - less
+          - libfido2
+          - libva
+          - linux-lts-headers
+          - mako
+          - man-db
+          - pass
+          - pcsclite
+          - pipewire
+          - rustup
+          - openssh
+          - phonon-qt5-vlc
+          - tmux
+          - wl-clipboard
+          - xdg-user-dirs
+          - yubikey-manager
+          - yubikey-personalization
+          - zsh
+          - zsh-completions
+
+    - name: install visual apps
+      pacman:
+        name:
+          - alacritty
+          - chromium
+          - code
+          - font-manager
+          - hyprland
+          - neovim
+          - nvidia-dkms
+          - obs-studio
+          - pavucontrol
+          - polkit-kde-agent
+          - qt5-wayland
+          - qt6-wayland
+          - qt5ct
+          - ttf-hack-nerd
+          - ttf-jetbrains-mono-nerd
+          - udiskie
+          - vlc
+          - waybar
+          - waylock
+          - wget
+          - wofi
+
+    - name: configure ssh
+      get_url:
+        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/20-force_publickey_auth.conf
+        dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
+
+    - name: enable sshd
+      systemd_service:
+        name: sshd
+        enabled: true
+        state: started
+
+    - name: enable timesync
+      systemd_service:
+        name: systemd-timesyncd
+        enabled: true
+        state: started
+
+    - name: enable docker
+      systemd_service:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: enable bluetooth
+      systemd_service:
+        name: bluetooth
+        enabled: true
+        state: started
+
+    - name: enable nvidia-hibernate
+      systemd_service:
+        name: nvidia-hibernate
+        enabled: true
+
+    - name: enable nvidia-resume
+      systemd_service:
+        name: nvidia-resume
+        enabled: true
+
+    - name: enable nvidia-suspend
+      systemd_service:
+        name: nvidia-suspend
+        enabled: true
+
+    - name: delete waybar config (will come from dotfiles later)
+      file:
+        path: /etc/xdg/waybar
+        state: absent
+
+    - name: create boot loader config
+      get_url:
+        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/loader.conf
+        dest: /boot/loader/loader.conf
+
+    - name: get root partition device
+      shell: df -h | grep '[[:space:]]/$' | cut -d ' ' -f1
+      register: root_device
+    - set_fact:
+        root_device: '{{ root_device.stdout }}'
+
+    - name: set part_uuid variable
+      shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
+      register: part_uuid
+    - set_fact:
+        part_uuid: '{{ part_uuid.stdout }}'
+
+    - name: fetch boot loader entry template
+      get_url:
+        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/arch.conf
+        dest: ./arch.conf
+
+    - name: fetch boot loader fallback entry template
+      get_url:
+        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
+        dest: ./arch-fallback.conf
+
+    - name: create boot loader entry
+      template:
+        src: arch.conf
+        dest: /boot/loader/entries/arch.conf
+
+    - name: create boot loader fallback entry
+      template:
+        src: arch-fallback.conf
+        dest: /boot/loader/entries/arch-fallback.conf
+
+    - name: configure ramdisk
+      get_url:
+        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/mkinitcpio.conf
+        dest: /etc/mkinitcpio.conf
+
+    - name: create ramdisk
+      command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-custom.img
+
+    - name: configure modprobe
+      copy:
+        content: options nvidia-drm modeset=1
+        dest: /etc/modprobe.d/nvidia.conf
+
+    - name: grant wheel group sudo
+      copy:
+        content: "%wheel ALL=(ALL) NOPASSWD: ALL\n"
+        dest: "/etc/sudoers.d/wheel"
+
+    - name: create user
+      user:
+        append: true
+        groups:
+          - docker
+          - wheel
+        name: "{{ user }}"
+        password: "{{ user_password | password_hash('sha512') }}"
+        shell: /usr/bin/zsh
+
+    - name: user specific
+      block:
+
+        - name: check for oh-my-zsh
+          stat: "path=/home/{{ user }}/.oh-my-zsh"
+          register: ohmyzsh
+
+        - name: install oh-my-zsh
+          shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+          when: not ohmyzsh.stat.exists
+
+        - name: create xdg dirs
+          file:
+            path: "{{ item }}"
+            state: directory
+          loop:
+            -  "/home/{{ user }}/desktop"
+            -  "/home/{{ user }}/downloads"
+            -  "/home/{{ user }}/templates"
+            -  "/home/{{ user }}/public"
+            -  "/home/{{ user }}/media/documents"
+            -  "/home/{{ user }}/media/music"
+            -  "/home/{{ user }}/media/pictures"
+            -  "/home/{{ user }}/media/videos"
+
+        - name: check if dotfiles are downloaded
+          stat: "path=/home/{{ user }}/.dotfiles"
+          register: dotfiles
+
+        - name: clone dotfiles
+          when: not dotfiles.stat.exists
+          git:
+            repo: https://github.com/LowEntropyEntity/dotfiles.git
+            dest: "/home/{{ user }}/.dotfiles/"
+            bare: yes
+
+        - name: set dotfiles push remote
+          git_config:
+            name: remote.origin.pushurl
+            value: git@github.com:LowEntropyEntity/dotfiles.git
+            repo: "/home/{{ user }}/.dotfiles"
+            scope: local
+
+        - name: configure dotfiles to not show untracked files
+          git_config:
+            name: status.showUntrackedFiles
+            value: "no"
+            repo: "/home/{{ user }}/.dotfiles"
+            scope: local
+
+        - name: checkout dotfiles
+          shell: "git --git-dir=/home/{{ user }}/.dotfiles/ --work-tree=/home/{{ user }} checkout -f"
+          args:
+            chdir: "/home/{{ user }}/.dotfiles"
+          register: debug
+        - debug:
+            msg: "{{ debug.stdout }}"
+
+        - name: import gpg key
+          command: gpg --locate-key sean@sean.xyz
+
+        - name: trust gpg key
+          shell: echo "1F86464D595F2DCD5F6029B6E81D523E5DD412E2:6:" | gpg --import-ownertrust
+
+        - name: sync submodules
+          shell: "git --git-dir=/home/{{ user }}/.dotfiles/ --work-tree=/home/{{ user }} submodule update --init"
+          args:
+            chdir: "/home/{{ user }}/.dotfiles"
+          register: debug
+        - debug:
+            msg: "{{ debug.stdout }}"
+
+        - name: list aur packages
+          find:
+            paths: "/home/{{ user }}/.src/aur.archlinux.org/"
+            file_type: directory
+          register: aur_directories
+        - set_fact:
+            aur_directories: "{{ aur_directories.files }}"
+
+        - name: build aur packages
+          command: makepkg -si --noconfirm
+          args:
+            chdir: "{{ item.path }}"
+          with_items: "{{ aur_directories }}"
+
+        - name: associate gpg private key with yubikey if plugged in
+          command: gpg --card-status
+          ignore_errors: yes
+
+      become: true
+      become_user: "{{ user }}"
+
+    - name: disable root
+      user:
+        name: root
+        password: "!"
+
+    - name: reboot
+      reboot:
+
