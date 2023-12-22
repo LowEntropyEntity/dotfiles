@@ -119,6 +119,6 @@ fi
 gpg -K | grep sean@sean.xyz 1>/dev/null 2>&1 || gpg --card-status 1> /dev/null || echo 'private key not found: run gpg --card-status\n'
 
 if [ ! -d ~/.password-store ]; then
-	echo 'passwords not found, run: git clone git@github.com:LowEntropyEntity/pass .password-store\n'
+	echo 'passwords not found, run: git clone git@github.com:LowEntropyEntity/pass ~/.password-store\n'
 fi
 

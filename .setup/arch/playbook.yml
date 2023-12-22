@@ -56,12 +56,20 @@
           - openssh
           - phonon-qt5-vlc
           - tmux
+          - unzip
           - wl-clipboard
           - xdg-user-dirs
           - yubikey-manager
           - yubikey-personalization
           - zsh
           - zsh-completions
+
+    - name: install development apps
+      pacman:
+        name:
+          - code
+          - go
+          - npm
 
     - name: install visual apps
       pacman:
@@ -186,6 +194,12 @@
       copy:
         content: options nvidia-drm modeset=1
         dest: /etc/modprobe.d/nvidia.conf
+
+    - name: ignore lid closing (handled by hyprland)
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        regexp: '^(.*)HandleLidSwitch='
+        line: "HandleLidSwitch=ignore"
 
     - name: grant wheel group sudo
       copy:

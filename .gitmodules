@@ -13,3 +13,6 @@
 [submodule ".oh-my-zsh"]
 	path = .oh-my-zsh
 	url = https://github.com/ohmyzsh/ohmyzsh.git
+[submodule ".src/aur.archlinux.org/swww"]
+	path = .src/aur.archlinux.org/swww
+	url = https://aur.archlinux.org/swww.git

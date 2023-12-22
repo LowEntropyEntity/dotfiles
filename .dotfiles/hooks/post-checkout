@@ -1,3 +1,4 @@
 echo 'running post-checkout hook'
 chmod 700 .gnupg
+chmod 600 ~/.ssh/sean_ed25519_yubikey.pub
 
