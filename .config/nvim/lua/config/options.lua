@@ -60,3 +60,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end
 })
 
+-- rust
+vim.g.rust_recommended_style = false
+

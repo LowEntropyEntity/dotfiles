@@ -67,6 +67,8 @@
     - name: install development apps
       pacman:
         name:
+          - clang
+          - cmake
           - code
           - go
           - npm
@@ -87,6 +89,7 @@
           - qt5-wayland
           - qt6-wayland
           - qt5ct
+          - swayidle
           - ttf-hack-nerd
           - ttf-jetbrains-mono-nerd
           - udiskie
@@ -240,6 +243,9 @@
             -  "/home/{{ user }}/media/music"
             -  "/home/{{ user }}/media/pictures"
             -  "/home/{{ user }}/media/videos"
+
+        - name: configure rust
+          command: rustup default stable
 
         - name: check if dotfiles are downloaded
           stat: "path=/home/{{ user }}/.dotfiles"

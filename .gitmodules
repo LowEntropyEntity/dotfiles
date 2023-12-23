@@ -16,3 +16,12 @@
 [submodule ".src/aur.archlinux.org/swww"]
 	path = .src/aur.archlinux.org/swww
 	url = https://aur.archlinux.org/swww.git
+[submodule ".src/aur.archlinux.org/flutter"]
+	path = .src/aur.archlinux.org/flutter
+	url = https://aur.archlinux.org/flutter.git
+[submodule ".src/aur.archlinux.org/android-studio"]
+	path = .src/aur.archlinux.org/android-studio
+	url = https://aur.archlinux.org/android-studio.git
+[submodule ".config/wofi/catppuccin"]
+	path = .config/wofi/catppuccin
+	url = https://github.com/prtce/wofi.git

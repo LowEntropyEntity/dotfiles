@@ -1,3 +1,6 @@
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
+
 local keymap = vim.keymap
 
 -- directory navigation
@@ -14,6 +17,10 @@ keymap.set('n', '<C-l>', '<C-w>l', opts) -- navigate right
 keymap.set('n', '<leader>sv', ':vsplit<CR>', opts) -- split vertically
 keymap.set('n', '<leader>sh', ':split<CR>', opts) -- split horizontally
 
+-- whitespace
+keymap.set('n', '<leader>ws', ':set nolist!<CR>', opts)
+keymap.set('n', '<leader>ln', ':set nornu!<CR>', opts)
+
 -- transparency
 keymap.set('n', '<leader>t', function()
 	local catppuccin = require('catppuccin')
@@ -22,7 +29,7 @@ keymap.set('n', '<leader>t', function()
 	vim.cmd.colorscheme(vim.g.colors_name)
 end)
 
--- comments
+-- toggle comments
 vim.api.nvim_set_keymap('n', '<C-_>', 'gcc', { noremap = false })
 vim.api.nvim_set_keymap('v', '<C-_>', 'gcc', { noremap = false })
 
@@ -40,4 +47,18 @@ keymap.set('n', '<leader>u', ':UndotreeToggle<CR>')
 
 -- git (fugitive)
 keymap.set('n', '<leader>gs', ':Git<CR>')
+
+-- move lines in visual mode
+keymap.set('v', 'J', ":m '>+1<CR>gv=gv")
+keymap.set('v', 'K', ":m '<-2<CR>gv=gv")
+
+-- paging
+keymap.set('n', '<C-d>', '<C-d>zz')
+keymap.set('n', '<C-u>', '<C-u>zz')
+
+-- paste without saving overwritten text in the paste buffer
+keymap.set('x', '<leader>p', '\"_dP')
+
+-- sed current selection
+keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>//gI<Left><Left><Left>]])
 
