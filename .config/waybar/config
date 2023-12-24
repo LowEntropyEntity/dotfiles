@@ -7,7 +7,7 @@
 	// Choose the order of the modules
 	"modules-left": ["hyprland/workspaces", "custom/media"],
 	"modules-center": ["clock"],
-	"modules-right": ["idle_inhibitor", "pulseaudio", "network", "backlight", "keyboard-state", "bluetooth", "battery", "tray"],
+	"modules-right": ["idle_inhibitor", "keyboard-state", "pulseaudio", "network", "backlight", "bluetooth", "battery", "tray"],
 
 	"hyprland/workspaces": {
 		// "format": "{icon}",
@@ -41,7 +41,8 @@
 		"format-icons": {
 			"locked": "",
 			"unlocked": ""
-		}
+		},
+		"binding-keys": [1, 69, 70]
 	},
 
 	// Bluetooth

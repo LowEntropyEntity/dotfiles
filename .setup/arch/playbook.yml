@@ -101,7 +101,7 @@
 
     - name: configure ssh
       get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/20-force_publickey_auth.conf
+        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/20-force_publickey_auth.conf
         dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
 
     - name: enable sshd
@@ -150,7 +150,7 @@
 
     - name: create boot loader config
       get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/loader.conf
+        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/loader.conf
         dest: /boot/loader/loader.conf
 
     - name: get root partition device
@@ -167,12 +167,12 @@
 
     - name: fetch boot loader entry template
       get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/arch.conf
+        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch.conf
         dest: ./arch.conf
 
     - name: fetch boot loader fallback entry template
       get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
+        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
         dest: ./arch-fallback.conf
 
     - name: create boot loader entry
@@ -187,7 +187,7 @@
 
     - name: configure ramdisk
       get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/dotfiles/main/.setup/arch/mkinitcpio.conf
+        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/mkinitcpio.conf
         dest: /etc/mkinitcpio.conf
 
     - name: create ramdisk
@@ -214,6 +214,7 @@
         append: true
         groups:
           - docker
+          - input
           - wheel
         name: "{{ user }}"
         password: "{{ user_password | password_hash('sha512') }}"
@@ -254,14 +255,14 @@
         - name: clone dotfiles
           when: not dotfiles.stat.exists
           git:
-            repo: https://github.com/LowEntropyEntity/dotfiles.git
+            repo: https://github.com/LowEntropyEntity/.dotfiles.git
             dest: "/home/{{ user }}/.dotfiles/"
             bare: yes
 
         - name: set dotfiles push remote
           git_config:
             name: remote.origin.pushurl
-            value: git@github.com:LowEntropyEntity/dotfiles.git
+            value: git@github.com:LowEntropyEntity/.dotfiles.git
             repo: "/home/{{ user }}/.dotfiles"
             scope: local
 

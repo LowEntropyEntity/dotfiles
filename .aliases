@@ -15,8 +15,6 @@ alias lla='ls -lAFG'	# long format, all entries, slashes after directories, colo
 
 alias now='\date +"%F %T"'
 
-alias nvidia-check='cat /boot/loader/entries/*.conf | grep nvidia &> /dev/null || echo "nvidia not found in /boot/loader/entries/*.conf, consider adding nvidia-drm.modeset=1"'
-
 alias findfile='find . | grep'	# find file by name
 
 alias stealth='set +o history'	# stop writing commands to history

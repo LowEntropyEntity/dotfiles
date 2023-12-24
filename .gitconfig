@@ -66,3 +66,5 @@
 [includeIf "gitdir:~/sonos/"]
 	path = ~/.gitconfig-sonos
 
+[safe]
+	directory = /opt/flutter
