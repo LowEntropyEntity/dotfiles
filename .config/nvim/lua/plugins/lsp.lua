@@ -19,8 +19,8 @@ end
 
 local lsp_zero_config = function()
 	local lsp_zero = require('lsp-zero')
-	lsp_zero.extend_lspconfig()
-	lsp_zero.on_attach(function(client, bufnr)
+	local lsp_config = require('lspconfig')
+	local on_attach = function(client, bufnr)
 		-- see :help lsp-zero-keybindings
 		-- to learn the available actions
 		lsp_zero.default_keymaps({buffer = bufnr})
@@ -37,7 +37,12 @@ local lsp_zero_config = function()
 		vim.keymap.set('n', '<leader>vrr', function() vim.lsp.buf.references() end, opts)
 		vim.keymap.set('n', '<leader>vrn', function() vim.lsp.buf.rename() end, opts)
 		-- vim.keymap.set('n', '<C-h>', function() vim.lsp.buf.signature_help() end, opts)
-	end)
+	end
+	lsp_zero.extend_lspconfig()
+	lsp_config['dartls'].setup({
+		on_attach = on_attach,
+	})
+	lsp_zero.on_attach = on_attach
 end
 
 return {
