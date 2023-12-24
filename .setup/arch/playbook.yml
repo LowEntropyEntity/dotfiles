@@ -295,6 +295,13 @@
         - debug:
             msg: "{{ debug.stdout }}"
 
+        - name: prepare ~/src
+          git:
+            repo: git@github.com:LowEntropyEntity/src.git
+            dest: "/home/{{ user }}/src/"
+            clone: no
+            update: no
+
         - name: list aur packages
           find:
             paths: "/home/{{ user }}/.src/aur.archlinux.org/"
@@ -320,7 +327,4 @@
       user:
         name: root
         password: "!"
-
-    - name: reboot
-      reboot:
 
