@@ -223,14 +223,6 @@
     - name: user specific
       block:
 
-        - name: check for oh-my-zsh
-          stat: "path=/home/{{ user }}/.oh-my-zsh"
-          register: ohmyzsh
-
-        - name: install oh-my-zsh
-          shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-          when: not ohmyzsh.stat.exists
-
         - name: create xdg dirs
           file:
             path: "{{ item }}"
@@ -299,6 +291,13 @@
           git:
             repo: git@github.com:LowEntropyEntity/src.git
             dest: "/home/{{ user }}/src/"
+            clone: no
+            update: no
+
+        - name: prepare wallpaper git
+          git:
+            repo: git@github.com:LowEntropyEntity/wallpaper.git
+            dest: "/home/{{ user }}/media/pictures/wallpaper"
             clone: no
             update: no
 
