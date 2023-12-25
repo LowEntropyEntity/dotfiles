@@ -287,20 +287,6 @@
         - debug:
             msg: "{{ debug.stdout }}"
 
-        - name: prepare ~/src
-          git:
-            repo: git@github.com:LowEntropyEntity/src.git
-            dest: "/home/{{ user }}/src/"
-            clone: no
-            update: no
-
-        - name: prepare wallpaper git
-          git:
-            repo: git@github.com:LowEntropyEntity/wallpaper.git
-            dest: "/home/{{ user }}/media/pictures/wallpaper"
-            clone: no
-            update: no
-
         - name: list aur packages
           find:
             paths: "/home/{{ user }}/.src/aur.archlinux.org/"
@@ -314,10 +300,6 @@
           args:
             chdir: "{{ item.path }}"
           with_items: "{{ aur_directories }}"
-
-        - name: associate gpg private key with yubikey if plugged in
-          command: gpg --card-status
-          ignore_errors: yes
 
       become: true
       become_user: "{{ user }}"

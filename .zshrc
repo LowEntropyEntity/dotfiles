@@ -113,3 +113,11 @@ if [ ! -d ~/.password-store ]; then
 	echo 'passwords not found, run: git clone git@github.com:LowEntropyEntity/pass ~/.password-store\n'
 fi
 
+if [ ! -d ~/media/pictures/wallpaper ]; then
+	echo 'wallpaper not found, run: git clone git@github.com:LowEntropyEntity/wallpaper.git ~/media/pictures/wallpaper\n'
+fi
+
+if [ ! -d ~/src ]; then
+	echo 'src not found, run: git clone git@github.com:LowEntropyEntity/src.git --recursive ~/src\n'
+fi
+
