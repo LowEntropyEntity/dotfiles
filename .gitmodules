@@ -25,3 +25,9 @@
 [submodule ".config/wofi/catppuccin"]
 	path = .config/wofi/catppuccin
 	url = https://github.com/prtce/wofi.git
+[submodule ".src/aur.archlinux.org/zoom"]
+	path = .src/aur.archlinux.org/zoom
+	url = https://aur.archlinux.org/zoom.git
+[submodule ".src/aur.archlinux.org/slack-desktop"]
+	path = .src/aur.archlinux.org/slack-desktop
+	url = https://aur.archlinux.org/slack-desktop.git
