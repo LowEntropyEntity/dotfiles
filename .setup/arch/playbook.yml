@@ -301,6 +301,75 @@
             chdir: "{{ item.path }}"
           with_items: "{{ aur_directories }}"
 
+        - name: download android cmdline-tools
+          get_url:
+            url: https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
+            dest: /tmp/android-commandlinetools.zip
+
+        - name: download android build-tools
+          get_url:
+            url: https://dl.google.com/android/repository/build-tools_r34-linux.zip
+            dest: /tmp/build-tools.zip
+
+        - name: download android platform-tools
+          get_url:
+            url: https://dl.google.com/android/repository/platform-tools_r34.0.5-linux.zip
+            dest: /tmp/platform-tools.zip
+
+        - name: download android platform 34
+          get_url:
+            url: https://dl.google.com/android/repository/platform-34-ext7_r02.zip
+            dest: /tmp/platform-34.zip
+
+        - name: reset android studio sdk directory
+          file:
+            path: "/home/{{ user }}/android-sdk"
+            state: absent
+
+        - name: create android studio platforms directory
+          file:
+            path: "/home/{{ user }}/android-sdk/platforms"
+            state: directory
+
+        - name: create android studio cmdline-tools directory
+          file:
+            path: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+            state: directory
+
+        - name: create android studio build-tools directory
+          file:
+            path: "/home/{{ user }}/android-sdk/build-tools/34.0.0"
+            state: directory
+
+        - name: unzip android cmdline-tools
+          unarchive:
+            src: /tmp/android-commandlinetools.zip
+            dest: /tmp
+
+        - name: move android cmdline-tools to proper location
+          shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/android-sdk/cmdline-tools/latest"
+
+        - name: unzip android build-tools
+          unarchive:
+            src: /tmp/build-tools.zip
+            dest: /tmp
+
+        - name: move android build-tools to proper location
+          shell: "mv /tmp/android-14/* /home/{{ user }}/android-sdk/build-tools/34.0.0"
+
+        - name: unzip android platform-tools
+          unarchive:
+            src: /tmp/platform-tools.zip
+            dest: "/home/{{ user }}/android-sdk"
+
+        - name: unzip android platform-tools
+          unarchive:
+            src: /tmp/platform-34.zip
+            dest: "/home/{{ user }}/android-sdk/platforms"
+
+        - name: accept android-studio sdk licenses
+          shell: yes | flutter doctor --android-licenses
+
       become: true
       become_user: "{{ user }}"
 
