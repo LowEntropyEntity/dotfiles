@@ -367,6 +367,9 @@
             src: /tmp/platform-34.zip
             dest: "/home/{{ user }}/android-sdk/platforms"
 
+        - name: point flutter to android-sdk
+          command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
+
         - name: accept android-studio sdk licenses
           shell: yes | flutter doctor --android-licenses
 
