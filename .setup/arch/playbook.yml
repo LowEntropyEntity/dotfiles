@@ -57,6 +57,7 @@
           - phonon-qt5-vlc
           - tmux
           - unzip
+          - usbip
           - wl-clipboard
           - xdg-user-dirs
           - yubikey-manager
