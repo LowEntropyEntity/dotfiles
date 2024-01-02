@@ -52,6 +52,7 @@
           - pass
           - pcsclite
           - pipewire
+          - ripgrep
           - rustup
           - openssh
           - phonon-qt5-vlc
@@ -72,6 +73,7 @@
           - cmake
           - code
           - go
+          - nodejs
           - npm
 
     - name: install visual apps
