@@ -92,6 +92,7 @@
           - qt5-wayland
           - qt6-wayland
           - qt5ct
+          - speedcrunch
           - swayidle
           - ttf-hack-nerd
           - ttf-jetbrains-mono-nerd
