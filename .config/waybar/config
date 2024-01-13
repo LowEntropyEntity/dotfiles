@@ -25,7 +25,8 @@
 			"obs": "󰃽",
 			"slack": "",
 			"spotify": "󰓇",
-			"vlc": "󰕼"
+			"vlc": "󰕼",
+			"zoom": "󰍫"
 		},
 		"disable-scroll": true,
 		"all-outputs": true,

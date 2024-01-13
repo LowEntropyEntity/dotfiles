@@ -97,6 +97,12 @@ if [ -f ~/.env ]; then
 	export $(cat ~/.env | xargs)
 fi
 
+for file in ~/.env-*; do
+	if [[ -e $file ]]; then
+		export $(cat $file | xargs)
+	fi
+done
+
 setopt completealiases
 
 export GPG_TTY="$(tty)"

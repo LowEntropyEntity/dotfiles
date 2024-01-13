@@ -1,6 +1,7 @@
 alias cd='pushd > /dev/null'
 alias p='popd'
 
+alias ai='chatgpt'
 alias aws-login='aws sso login --sso-session'
 
 alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'

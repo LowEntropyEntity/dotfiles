@@ -31,3 +31,9 @@
 [submodule ".src/aur.archlinux.org/slack-desktop"]
 	path = .src/aur.archlinux.org/slack-desktop
 	url = https://aur.archlinux.org/slack-desktop.git
+[submodule ".src/aur.archlinux.org/chatgpt-shell-cli"]
+	path = .src/aur.archlinux.org/chatgpt-shell-cli
+	url = https://aur.archlinux.org/chatgpt-shell-cli.git
+[submodule ".src/aur.archlinux.org/jan-bin"]
+	path = .src/aur.archlinux.org/jan-bin
+	url = https://aur.archlinux.org/jan-bin.git
