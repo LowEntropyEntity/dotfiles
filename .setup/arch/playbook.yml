@@ -71,7 +71,6 @@
         name:
           - clang
           - cmake
-          - code
           - go
           - nodejs
           - npm
@@ -81,7 +80,6 @@
         name:
           - alacritty
           - chromium
-          - code
           - font-manager
           - hyprland
           - neovim

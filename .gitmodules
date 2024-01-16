@@ -37,3 +37,6 @@
 [submodule ".src/aur.archlinux.org/jan-bin"]
 	path = .src/aur.archlinux.org/jan-bin
 	url = https://aur.archlinux.org/jan-bin.git
+[submodule ".src/aur.archlinux.org/visual-studio-code-bin"]
+	path = .src/aur.archlinux.org/visual-studio-code-bin
+	url = https://aur.archlinux.org/visual-studio-code-bin.git

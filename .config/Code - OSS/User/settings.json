@@ -1,4 +1,4 @@
 {
-    "editor.renderWhitespace": "boundary",
-    "editor.insertSpaces": false
+	"editor.renderWhitespace": "boundary",
+	"editor.insertSpaces": false
 }
