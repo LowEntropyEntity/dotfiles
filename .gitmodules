@@ -40,3 +40,6 @@
 [submodule ".src/aur.archlinux.org/visual-studio-code-bin"]
 	path = .src/aur.archlinux.org/visual-studio-code-bin
 	url = https://aur.archlinux.org/visual-studio-code-bin.git
+[submodule ".src/aur.archlinux.org/postman-bin"]
+	path = .src/aur.archlinux.org/postman-bin
+	url = https://aur.archlinux.org/postman-bin.git
