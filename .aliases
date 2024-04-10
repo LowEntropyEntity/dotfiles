@@ -27,10 +27,12 @@ alias sudo='sudo '	# makes aliases available in sudo
 
 alias gz='gzip'
 alias tar.gz='tar-gz'
+alias tgz='tar -cvzf'
 alias .tar='tar -xvf'
 alias .tar.gz='.tar'
 alias .tar.xz='.tar'
 alias .gz='gzip -d'
+alias .tgz='tar -xvf'
 
 alias tmp='cd $(mktemp -d)'
 alias tmp.='cd $(mktemp -d --tmpdir=./)'

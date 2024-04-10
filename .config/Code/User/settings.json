@@ -2,5 +2,16 @@
 	"editor.renderWhitespace": "boundary",
 	"editor.insertSpaces": false,
 	"telemetry.telemetryLevel": "off",
-	"workbench.startupEditor": "none"
+	"workbench.startupEditor": "none",
+	"keyboard.dispatch": "keyCode",
+	"cSpell.userWords": [
+	],
+	"cSpell.customDictionaries": {
+
+	},
+	"CodeGPT.apiKey": "Google AI Studio",
+	"CodeGPT.Autocomplete.enabled": true,
+	"CodeGPT.Autocomplete.maxTokens": 500000,
+	"github.copilot.advanced": {},
+	"cloudcode.duetAI.project": "sonos-content-providers"
 }
