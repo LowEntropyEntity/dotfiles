@@ -41,6 +41,7 @@
           - fzf
           - gdb
           - git
+          - git-lfs
           - gnupg
           - hopenpgp-tools
           - less
@@ -101,6 +102,11 @@
           - wget
           - wofi
 
+    - name: install utilities
+      pacman:
+        name:
+          - cups
+
     - name: configure ssh
       get_url:
         url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/20-force_publickey_auth.conf
@@ -144,6 +150,12 @@
       systemd_service:
         name: nvidia-suspend
         enabled: true
+
+    - name: enable printing
+      systemd_service:
+        name: cups
+        enabled: true
+        state: started
 
     - name: delete waybar config (will come from dotfiles later)
       file:

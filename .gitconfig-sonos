@@ -1,3 +1,8 @@
 [credential "https://github.com"]
 	helper = !pass sonos/github.com-token
 
+[user]
+	email = sean.simonsen@sonos.com
+	name = sean simonsen
+	signingkey = 0xE81D523E5DD412E2
+
