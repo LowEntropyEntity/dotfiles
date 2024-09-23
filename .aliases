@@ -50,3 +50,4 @@ alias redis-start='docker run --rm -p 6379:6379 redis'
 
 alias vim='nvim'
 
+alias vpn='sudo openconnect corp-vpn.sonos.com -u sean.simonsen --useragent=AnyConnect'

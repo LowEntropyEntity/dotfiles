@@ -43,3 +43,12 @@
 [submodule ".src/aur.archlinux.org/postman-bin"]
 	path = .src/aur.archlinux.org/postman-bin
 	url = https://aur.archlinux.org/postman-bin.git
+[submodule ".src/aur.archlinux.org/i2p"]
+	path = .src/aur.archlinux.org/i2p
+	url = https://aur.archlinux.org/i2p.git
+[submodule ".src/aur.archlinux.org/java-service-wrapper"]
+	path = .src/aur.archlinux.org/java-service-wrapper
+	url = https://aur.archlinux.org/java-service-wrapper.git
+[submodule ".src/aur.archlinux.org/cursor-bin"]
+	path = .src/aur.archlinux.org/cursor-bin
+	url = https://aur.archlinux.org/cursor-bin.git

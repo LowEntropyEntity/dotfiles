@@ -80,10 +80,13 @@
       pacman:
         name:
           - alacritty
+          - blender
           - chromium
+          - cuda
           - font-manager
           - hyprland
           - neovim
+          - noto-fonts-emoji
           - nvidia-dkms
           - obs-studio
           - pavucontrol
