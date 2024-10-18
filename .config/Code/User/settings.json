@@ -15,5 +15,8 @@
 	"github.copilot.advanced": {},
 	"cloudcode.duetAI.project": "sonos-content-providers",
 	"window.customTitleBarVisibility": "auto",
-	"github.copilot.editor.enableAutoCompletions": true
+	"github.copilot.editor.enableAutoCompletions": true,
+	"[json]": {
+		"editor.defaultFormatter": "HookyQR.beautify"
+	}
 }

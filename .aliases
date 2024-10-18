@@ -2,12 +2,14 @@ alias cd='pushd > /dev/null'
 alias p='popd'
 
 alias ai='chatgpt'
-alias aws-login='aws sso login --sso-session'
+alias aws-login='aws sso login --profile'
 
 alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
 
 alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout'
+
+alias findfile='find . | grep'	# find file by name
 
 alias l='ls -1FG'	# list file name only, slashes after directories, color, don't recurse
 alias la='ls -1AFG'	# list file name only, all entries, slashes after directories, color, don't recurse
@@ -16,7 +18,7 @@ alias lla='ls -lAFG'	# long format, all entries, slashes after directories, colo
 
 alias now='\date +"%F %T"'
 
-alias findfile='find . | grep'	# find file by name
+alias oops='history -d $((HISTCMD-1))'
 
 alias stealth='set +o history'	# stop writing commands to history
 alias .stealth='set -o history'	# resume writing commands to history

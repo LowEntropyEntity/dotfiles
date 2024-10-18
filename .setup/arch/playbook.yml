@@ -104,6 +104,7 @@
           - waylock
           - wget
           - wofi
+          - xdg-desktop-portal-wlr
 
     - name: install utilities
       pacman:
