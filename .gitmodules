@@ -52,3 +52,6 @@
 [submodule ".src/aur.archlinux.org/cursor-bin"]
 	path = .src/aur.archlinux.org/cursor-bin
 	url = https://aur.archlinux.org/cursor-bin.git
+[submodule ".src/aur.archlinux.org/keybase-bin"]
+	path = .src/aur.archlinux.org/keybase-bin
+	url = https://aur.archlinux.org/keybase-bin.git

@@ -43,6 +43,7 @@
           - git
           - git-lfs
           - gnupg
+          - gocryptfs
           - hopenpgp-tools
           - less
           - libfido2
@@ -51,6 +52,7 @@
           - mako
           - man-db
           - pass
+          - pass-otp
           - pcsclite
           - pipewire
           - ripgrep
@@ -213,8 +215,16 @@
 
     - name: configure modprobe
       copy:
-        content: options nvidia-drm modeset=1
+        content: |
+          options nvidia-drm modeset=1
+          options nvidia-drm fbdev=1
+          options nvidia NVreg_PreserveVideoMemoryAllocations=1
         dest: /etc/modprobe.d/nvidia.conf
+
+    - name: configure nvidia udev rule
+      copy:
+        content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="on"'
+        dest: /etc/udev/rules.d/99-nvidia.rules
 
     - name: ignore lid closing (handled by hyprland)
       ansible.builtin.lineinfile:
