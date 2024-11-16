@@ -28,6 +28,9 @@
 	# show compact status
 	st = ! git status --short && echo "" && git stash list
 
+	# shows all tracked files in a tree-like format
+	tree = ls-tree -r --name-only HEAD
+
 [commit]
 	gpgSign = true
 

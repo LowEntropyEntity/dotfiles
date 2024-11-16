@@ -77,6 +77,7 @@
           - clang
           - cmake
           - go
+          - mitmproxy
           - nodejs
           - npm
 
