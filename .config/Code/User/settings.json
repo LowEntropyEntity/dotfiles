@@ -17,6 +17,6 @@
 	"window.customTitleBarVisibility": "auto",
 	"github.copilot.editor.enableAutoCompletions": true,
 	"[json]": {
-		"editor.defaultFormatter": "HookyQR.beautify"
+		"editor.defaultFormatter": "vscode.json-language-features"
 	}
 }
