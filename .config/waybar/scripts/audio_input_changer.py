@@ -47,7 +47,7 @@ for items in sources:
         output += f"{items['source_name']}\n"
 
 # Call wofi and show the list. take the selected source name and set it as the default source
-wofi_command = f"echo '{output}' | wofi --show=dmenu --hide-scroll --allow-markup --define=hide_search=true --location=top_right --width=600 --height=200 --xoffset=-60 --style=~/.config/wofi/catppuccin/src/mocha/rosewater/style.css"
+wofi_command = f"echo '{output}' | wofi --show=dmenu --hide-scroll --allow-markup --define=hide_search=true --location=top_right --xoffset=-60 --style=$HOME/.config/wofi/catppuccin/src/mocha/rosewater/style.css"
 wofi_process = subprocess.run(wofi_command, shell=True, encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 if wofi_process.returncode != 0:
