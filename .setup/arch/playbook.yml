@@ -34,6 +34,7 @@
           - bind
           - blueman
           - bluez
+          - bluez-utils
           - brightnessctl
           - ccid
           - docker
@@ -54,6 +55,7 @@
           - man-db
           - pass
           - pass-otp
+          - pavucontrol
           - pcsclite
           - pipewire
           - ripgrep
@@ -63,6 +65,7 @@
           - tmux
           - unzip
           - usbip
+          - wireplumber
           - wl-clipboard
           - xdg-user-dirs
           - yubikey-manager

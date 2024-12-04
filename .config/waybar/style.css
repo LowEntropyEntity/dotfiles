@@ -173,12 +173,11 @@ label:focus {
 }
 
 #wireplumber {
-	background-color: #fff0f5;
-	color: #000000;
+	color: @peach;
 }
 
 #wireplumber.muted {
-	background-color: #f53c3c;
+	color: @mauve;
 }
 
 #custom-media {

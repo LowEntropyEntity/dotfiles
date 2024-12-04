@@ -22,9 +22,6 @@
 [submodule ".src/aur.archlinux.org/android-studio"]
 	path = .src/aur.archlinux.org/android-studio
 	url = https://aur.archlinux.org/android-studio.git
-[submodule ".config/wofi/catppuccin"]
-	path = .config/wofi/catppuccin
-	url = https://github.com/prtce/wofi.git
 [submodule ".src/aur.archlinux.org/zoom"]
 	path = .src/aur.archlinux.org/zoom
 	url = https://aur.archlinux.org/zoom.git
@@ -55,3 +52,6 @@
 [submodule ".src/aur.archlinux.org/keybase-bin"]
 	path = .src/aur.archlinux.org/keybase-bin
 	url = https://aur.archlinux.org/keybase-bin.git
+[submodule ".config/wofi/wofi"]
+	path = .config/wofi/wofi
+	url = https://github.com/quantumfate/wofi.git
