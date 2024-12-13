@@ -103,6 +103,7 @@
           - qt6-wayland
           - qt5ct
           - speedcrunch
+          - spotify-launcher
           - swayidle
           - ttf-hack-nerd
           - ttf-jetbrains-mono-nerd
@@ -112,6 +113,7 @@
           - waylock
           - wget
           - wofi
+          - v4l2loopback-dkms
           - xdg-desktop-portal-wlr
 
     - name: install utilities
