@@ -58,3 +58,6 @@
 [submodule ".config/wofi/catppuccin"]
 	path = .config/wofi/catppuccin
 	url = https://github.com/quantumfate/wofi.git
+[submodule ".src/aur.archlinux.org/grimblast-git"]
+	path = .src/aur.archlinux.org/grimblast-git
+	url = https://aur.archlinux.org/grimblast-git.git

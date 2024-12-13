@@ -47,6 +47,7 @@
           - gnupg
           - gocryptfs
           - hopenpgp-tools
+          - jq
           - less
           - libfido2
           - libva
@@ -92,7 +93,9 @@
           - chromium
           - cuda
           - font-manager
+          - grim
           - hyprland
+          - hyprpicker
           - neovim
           - noto-fonts-emoji
           - nvidia-dkms
@@ -102,6 +105,7 @@
           - qt5-wayland
           - qt6-wayland
           - qt5ct
+          - slurp
           - speedcrunch
           - spotify-launcher
           - swayidle
@@ -111,6 +115,7 @@
           - vlc
           - waybar
           - waylock
+          - wf-recorder
           - wget
           - wofi
           - v4l2loopback-dkms
