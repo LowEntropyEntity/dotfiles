@@ -271,12 +271,13 @@
           loop:
             -  "/home/{{ user }}/desktop"
             -  "/home/{{ user }}/downloads"
-            -  "/home/{{ user }}/templates"
-            -  "/home/{{ user }}/public"
             -  "/home/{{ user }}/media/documents"
             -  "/home/{{ user }}/media/music"
             -  "/home/{{ user }}/media/pictures"
             -  "/home/{{ user }}/media/videos"
+            -  "/home/{{ user }}/public"
+            -  "/home/{{ user }}/screenshots"
+            -  "/home/{{ user }}/templates"
 
         - name: configure rust
           command: rustup default stable

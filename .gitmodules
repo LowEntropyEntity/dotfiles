@@ -1,63 +1,84 @@
 [submodule ".src/aur.archlinux.org/swaylock-effects"]
 	path = .src/aur.archlinux.org/swaylock-effects
 	url = https://aur.archlinux.org/swaylock-effects.git
+	ignore = dirty
 [submodule ".tmux/plugins/tpm"]
 	path = .tmux/plugins/tpm
 	url = https://github.com/tmux-plugins/tpm.git
+	ignore = dirty
 [submodule ".config/alacritty/catppuccin"]
 	path = .config/alacritty/catppuccin
 	url = https://github.com/catppuccin/alacritty.git
+	ignore = dirty
 [submodule ".config/waybar/catppuccin"]
 	path = .config/waybar/catppuccin
 	url = https://github.com/catppuccin/waybar.git
+	ignore = dirty
 [submodule ".oh-my-zsh"]
 	path = .oh-my-zsh
 	url = https://github.com/ohmyzsh/ohmyzsh.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/swww"]
 	path = .src/aur.archlinux.org/swww
 	url = https://aur.archlinux.org/swww.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/flutter"]
 	path = .src/aur.archlinux.org/flutter
 	url = https://aur.archlinux.org/flutter.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/android-studio"]
 	path = .src/aur.archlinux.org/android-studio
 	url = https://aur.archlinux.org/android-studio.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/zoom"]
 	path = .src/aur.archlinux.org/zoom
 	url = https://aur.archlinux.org/zoom.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/slack-desktop"]
 	path = .src/aur.archlinux.org/slack-desktop
 	url = https://aur.archlinux.org/slack-desktop.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/chatgpt-shell-cli"]
 	path = .src/aur.archlinux.org/chatgpt-shell-cli
 	url = https://aur.archlinux.org/chatgpt-shell-cli.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/jan-bin"]
 	path = .src/aur.archlinux.org/jan-bin
 	url = https://aur.archlinux.org/jan-bin.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/visual-studio-code-bin"]
 	path = .src/aur.archlinux.org/visual-studio-code-bin
 	url = https://aur.archlinux.org/visual-studio-code-bin.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/postman-bin"]
 	path = .src/aur.archlinux.org/postman-bin
 	url = https://aur.archlinux.org/postman-bin.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/i2p"]
 	path = .src/aur.archlinux.org/i2p
 	url = https://aur.archlinux.org/i2p.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/java-service-wrapper"]
 	path = .src/aur.archlinux.org/java-service-wrapper
 	url = https://aur.archlinux.org/java-service-wrapper.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/cursor-bin"]
 	path = .src/aur.archlinux.org/cursor-bin
 	url = https://aur.archlinux.org/cursor-bin.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/keybase-bin"]
 	path = .src/aur.archlinux.org/keybase-bin
 	url = https://aur.archlinux.org/keybase-bin.git
+	ignore = dirty
 [submodule ".config/wofi/wofi"]
 	path = .config/wofi/wofi
 	url = https://github.com/quantumfate/wofi.git
+	ignore = dirty
 [submodule ".config/wofi/catppuccin"]
 	path = .config/wofi/catppuccin
 	url = https://github.com/quantumfate/wofi.git
+	ignore = dirty
 [submodule ".src/aur.archlinux.org/grimblast-git"]
 	path = .src/aur.archlinux.org/grimblast-git
 	url = https://aur.archlinux.org/grimblast-git.git
+	ignore = dirty
