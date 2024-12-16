@@ -28,53 +28,70 @@
     - name: install base apps
       pacman:
         name:
-          - alsa-utils
-          - aws-cli-v2
-          - base-devel
-          - bind
-          - blueman
-          - bluez
-          - bluez-utils
-          - brightnessctl
-          - ccid
-          - dnscrypt-proxy
-          - docker
-          - docker-compose
-          - dolphin
-          - fzf
-          - gdb
-          - git
-          - git-lfs
-          - gnupg
-          - gocryptfs
-          - hopenpgp-tools
-          - jq
+          #=== System / Shells / Core Tools ===
+          - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
+          - linux-lts-headers          # Kernel headers for LTS kernel
+          - man-db                     # Man pages database
+          - openssh                    # SSH client/server
           - less
-          - libfido2
-          - libva
-          - linux-lts-headers
-          - mako
-          - man-db
-          - pass
-          - pass-otp
-          - pavucontrol
-          - pcsclite
-          - pipewire
-          - ripgrep
-          - rustup
-          - openssh
-          - phonon-qt5-vlc
           - tmux
           - unzip
-          - usbip
-          - wireplumber
-          - wl-clipboard
           - xdg-user-dirs
-          - yubikey-manager
-          - yubikey-personalization
-          - zbar
           - zsh
           - zsh-completions
+
+          #=== Audio / Media ===
+          - alsa-utils                 # ALSA sound utilities (amixer, etc.)
+          - pavucontrol                # GUI volume control for PipeWire/PulseAudio
+          - pipewire                   # Next-gen audio/video server
+          - wireplumber                # Session manager for PipeWire
+          - phonon-qt5-vlc             # Qt multimedia backend using VLC
+
+          #=== Bluetooth ===
+          - blueman                    # Bluetooth manager GUI
+          - bluez                      # Official Bluetooth protocol stack
+          - bluez-utils                # Bluetooth command-line utilities
+
+          #=== Networking / DNS / Security ===
+          - bind                       # DNS tools (e.g. `dig`)
+          - dnscrypt-proxy             # DNS encryption (DoH/DoT)
+          - ccid                       # Smart card CCID driver
+          - pcsclite                   # Daemon to communicate with smartcards
+          - hopenpgp-tools             # Additional PGP utilities
+          - yubikey-manager            # Manage YubiKeys
+          - yubikey-personalization    # Configure YubiKey parameters
+          - gnupg
+          - gocryptfs                  # Encrypted FUSE filesystem
+          - jq                         # JSON command-line processor
+          - pass                       # GPG-based password manager
+          - pass-otp                   # OTP extension for pass
+
+          #=== Cloud / CLI Tools ===
+          - aws-cli-v2                 # AWS command-line interface
+          - ripgrep                    # Faster grep alternative
+          - fzf                        # Fuzzy finder for the command line
+          - rustup                     # Rust toolchain installer
+          - gdb
+
+          #=== File Management / GPU libs ===
+          - dolphin                    # KDE file manager
+          - libva                      # VA-API for video acceleration
+          - brightnessctl              # Control screen brightness via CLI
+          - libfido2                   # FIDO/U2F authentication library
+          - zbar                       # Barcode/QR code scanner CLI tools
+
+          #=== Containers ===
+          - docker
+          - docker-compose
+
+          #=== Wayland / Display Utilities ===
+          - mako                       # Wayland notification daemon
+          - usbip                      # USB over IP utility
+          - wl-clipboard               # Wayland clipboard utilities
+
+          #=== Additional Common Tools ===
+          - git
+          - git-lfs
 
     - name: install development apps
       pacman:
@@ -82,50 +99,56 @@
           - clang
           - cmake
           - go
-          - mitmproxy
+          - mitmproxy                  # Interactive HTTPS proxy
           - nodejs
           - npm
 
     - name: install visual apps
       pacman:
         name:
+          #=== Terminal / Browsers / Editors ===
           - alacritty
-          - blender
           - chromium
-          - cuda
-          - font-manager
-          - grim
-          - hyprland
-          - hyprpicker
           - neovim
+          - wget
+          - blender
+
+          #=== Wayland Compositor & Related Tools ===
+          - hyprland                   # Wayland compositor
+          - hyprpicker                 # Color picker for Wayland
+          - grim                       # Screenshot tool for Wayland
+          - slurp                      # Select regions in Wayland (e.g. screenshot)
+          - swayidle                   # Idle management for Wayland
+          - waybar                     # Customizable Wayland status bar
+          - waylock                    # Screen locker for Wayland
+          - wf-recorder                # Screen recorder for Wayland
+          - wofi                       # Wayland application launcher
+          - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
+
+          #=== Fonts / Theming / Qt Integration ===
+          - font-manager
           - noto-fonts-emoji
-          - nvidia-dkms
-          - obs-studio
-          - pavucontrol
-          - polkit-kde-agent
-          - qt5-wayland
-          - qt6-wayland
-          - qt5ct
-          - slurp
-          - speedcrunch
-          - spotify-launcher
-          - swayidle
           - ttf-hack-nerd
           - ttf-jetbrains-mono-nerd
-          - udiskie
+          - qt5ct                      # Qt5 configuration tool
+          - qt5-wayland                # Wayland support for Qt5 apps
+          - qt6-wayland                # Wayland support for Qt6 apps
+
+          #=== GPU / Multimedia Tools ===
+          - cuda                       # NVIDIA GPU compute toolkit
+          - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
+          - obs-studio                 # Video recording/streaming
+          - speedcrunch                # High-precision calculator
+          - spotify-launcher           # Spotify launcher
+          - udiskie                    # Automount tool for removable media
           - vlc
-          - waybar
-          - waylock
-          - wf-recorder
-          - wget
-          - wofi
-          - v4l2loopback-dkms
-          - xdg-desktop-portal-wlr
+          - polkit-kde-agent           # Polkit auth agent for KDE
+          - v4l2loopback-dkms          # Virtual V4L2 camera device module
 
     - name: install utilities
       pacman:
         name:
-          - cups
+          - cups                       # Printing system
 
     - name: configure dnscrypt-proxy for DoH
       copy:
@@ -261,19 +284,18 @@
         dest: /etc/mkinitcpio.conf
 
     - name: create ramdisk
-      command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-custom.img
+      command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
 
     - name: configure modprobe
       copy:
         content: |
           options nvidia-drm modeset=1
-          options nvidia-drm fbdev=1
           options nvidia NVreg_PreserveVideoMemoryAllocations=1
         dest: /etc/modprobe.d/nvidia.conf
 
     - name: configure nvidia udev rule
       copy:
-        content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="on"'
+        content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
         dest: /etc/udev/rules.d/99-nvidia.rules
 
     - name: ignore lid closing (handled by hyprland)

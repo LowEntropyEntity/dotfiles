@@ -25,6 +25,8 @@ alias .stealth='set -o history'	# resume writing commands to history
 
 alias totp='oathtool --base32 --totp'
 
+alias share-dir='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
+
 alias sudo='sudo '	# makes aliases available in sudo
 
 alias gz='gzip'
