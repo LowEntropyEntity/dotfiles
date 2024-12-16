@@ -82,3 +82,6 @@
 	path = .src/aur.archlinux.org/grimblast-git
 	url = https://aur.archlinux.org/grimblast-git.git
 	ignore = dirty
+[submodule ".config/eza/eza-themes"]
+	path = .config/eza/eza-themes
+	url = https://github.com/eza-community/eza-themes.git

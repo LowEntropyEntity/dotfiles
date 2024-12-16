@@ -37,6 +37,11 @@
 [core]
 	editor = nvim
 	fileMode = true
+	pager = delta
+
+[delta]
+	features = catppuccin-mocha
+	navigate = true # use n and N to move between diff sections
 
 [format]
 	pretty = %C(auto)%h %H %d%C(reset)%n%C(dim white)%an <%ae>%C(reset) %C(cyan)%G? %GS%C(reset)%n%C(dim white)%ad%C(reset)%n%n    %s%C(reset)%n
@@ -45,11 +50,23 @@
 	patternType = extended
 	lineNumber = true
 
+[include]
+	path = ~/.config/delta/themes/catppuccin.gitconfig
+
 [init]
 	defaultBranch = main
 
+[interactive]
+	diffFilter = delta --color-only
+
 [log]
 	date = iso
+
+[merge]
+	conflictstyle = zdiff3
+
+[pull]
+	rebase = true
 
 [push]
 	autoSetupRemote = true

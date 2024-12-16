@@ -4,21 +4,24 @@ alias p='popd'
 alias ai='chatgpt'
 alias aws-login='aws sso login --profile'
 
+alias cat='bat --style=plain'
+
 alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
 
 alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout'
+alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout && echo "dotfiles synced successfully"'
 
-alias findfile='find . | grep'	# find file by name
+alias find='fd'
+alias findfile='fd . | grep'	# find file by name
 
-alias l='ls -1FG'	# list file name only, slashes after directories, color, don't recurse
-alias la='ls -1AFG'	# list file name only, all entries, slashes after directories, color, don't recurse
-alias ll='ls -lFG'	# long format, slashes after directories, color, don't recurse
-alias lla='ls -lAFG'	# long format, all entries, slashes after directories, color, don't recurse
+alias grep='rg'
+
+alias l='eza -1 --classify'           # List file name only, slashes after directories, color by default
+alias la='eza -1 -a --classify'       # Include hidden files, slashes after directories, color by default
+alias ll='eza -l --classify'          # Long format, slashes after directories, color by default
+alias lla='eza -l -a --classify'      # Long format, include hidden files, slashes after directories, color by default
 
 alias now='\date +"%F %T"'
-
-alias oops='history -d $((HISTCMD-1))'
 
 alias stealth='set +o history'	# stop writing commands to history
 alias .stealth='set -o history'	# resume writing commands to history
@@ -26,6 +29,7 @@ alias .stealth='set -o history'	# resume writing commands to history
 alias totp='oathtool --base32 --totp'
 
 alias share-dir='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
+alias share-dir-git='(git ls-tree -r --name-only HEAD; echo; git ls-tree -r --name-only HEAD | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
 
 alias sudo='sudo '	# makes aliases available in sudo
 
@@ -50,8 +54,14 @@ alias speakers='speaker-test -t wav -c 2'
 
 alias adbmirror='adb shell screenrecord --output-format=h264 - | ffplay -framerate 60 -probesize 32 -sync video -'
 
-alias redis-start='docker run --rm -p 6379:6379 redis'
+alias redis='docker run --rm -p 6379:6379 redis'
 
 alias vim='nvim'
 
 alias vpn='sudo openconnect corp-vpn.sonos.com -u sean.simonsen --useragent=AnyConnect'
+
+alias zshrc='omz reload'
+
+alias -g -- -h='-h 2>&1 | { bat --language=help --style=plain || \cat; }'
+alias -g -- --help='--help 2>&1 | { bat --language=help --style=plain || \cat; }'
+

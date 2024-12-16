@@ -53,6 +53,7 @@
           - less
           - tmux
           - unzip
+          - wget
           - xdg-user-dirs
           - zsh
           - zsh-completions
@@ -127,8 +128,12 @@
           - alacritty
           - chromium
           - neovim
-          - wget
           - blender
+
+          #=== Linux command replacements ===
+          - bat                        # cat
+          - fd                         # find
+          - eza                        # ls
 
           #=== Wayland Compositor & Related Tools ===
           - hyprland                   # Wayland compositor
@@ -159,6 +164,9 @@
           - vlc
           - polkit-kde-agent           # Polkit auth agent for KDE
           - v4l2loopback-dkms          # Virtual V4L2 camera device module
+
+          #=== development tools ===
+          - git-delta
 
     - name: install nvidia-related packages
       pacman:
