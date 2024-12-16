@@ -37,6 +37,7 @@
           - bluez-utils
           - brightnessctl
           - ccid
+          - dnscrypt-proxy
           - docker
           - docker-compose
           - dolphin
@@ -125,6 +126,42 @@
       pacman:
         name:
           - cups
+
+    - name: configure dnscrypt-proxy for DoH
+      copy:
+        content: |
+          server_names = ['cloudflare', 'google']
+        dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: enable dnscrypt-proxy
+      systemd_service:
+        name: dnscrypt-proxy.service
+        enabled: true
+        state: started
+
+    - name: update /etc/resolv.conf to use dnscrypt-proxy
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver '
+        line: 'nameserver 127.0.0.1'
+
+    - name: disable NetworkManager DNS overwrites
+      copy:
+        dest: /etc/NetworkManager/conf.d/dns-override.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [main]
+          dns=none
+
+    - name: restart NetworkManager
+      systemd:
+        name: NetworkManager
+        state: restarted
 
     - name: configure ssh
       get_url:
