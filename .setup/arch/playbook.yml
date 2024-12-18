@@ -503,7 +503,6 @@
             - android-studio
             - aws-cli-v2-bin
             - chatgpt-shell-cli
-            - cursor-bin
             - flutter
             - grimblast-git
             - i2p
@@ -516,7 +515,6 @@
             - swaylock-effects
             - swww
             - visual-studio-code-bin
-            - yay
             - zoom
 
         - name: reset android studio sdk directory
