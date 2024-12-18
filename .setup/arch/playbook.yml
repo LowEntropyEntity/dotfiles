@@ -483,7 +483,7 @@
 
         - name: list aur packages
           find:
-            paths: "/home/{{ user }}/             - "
+            paths: "/home/{{ user }}/.src/aur.archlinux.org"
             file_type: directory
           register: aur_directories
 
@@ -498,29 +498,26 @@
           when: aur_directories|length > 0
 
         - name: install aur packages with yay
-          pacman:
-            name:
-              - android-studio
-              - aws-cli-v2-bin
-              - chatgpt-shell-cli
-              - cursor-bin
-              - flutter
-              - grimblast-git
-              - i2p
-              - jan-bin
-              - java-service-wrapper
-              - keybase-bin
-              - postman-bin
-              - python-huggingface-hub
-              - slack-desktop
-              - swaylock-effects
-              - swww
-              - visual-studio-code-bin
-              - yay
-              - zoom
-            state: present
-            executable: /usr/bin/yay
-            extra_args: --builddir /var/cache/yay
+          command: yay -S --noconfirm {{ item }}
+          with_items:
+            - android-studio
+            - aws-cli-v2-bin
+            - chatgpt-shell-cli
+            - cursor-bin
+            - flutter
+            - grimblast-git
+            - i2p
+            - jan-bin
+            - java-service-wrapper
+            - keybase-bin
+            - postman-bin
+            - python-huggingface-hub
+            - slack-desktop
+            - swaylock-effects
+            - swww
+            - visual-studio-code-bin
+            - yay
+            - zoom
 
         - name: reset android studio sdk directory
           file:
