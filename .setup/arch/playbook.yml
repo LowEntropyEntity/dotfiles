@@ -3,17 +3,17 @@
 
   vars_prompt:
 
-    - name: user (leave blank to skip)
-      prompt: enter non-root user name
+    - name: user
+      prompt: enter non-root user name (leave blank to skip)
       private: false
       default: ""
 
-    - name: user_password (leave blank if skipped above)
-      prompt: enter user password
+    - name: user_password
+      prompt: enter user password (leave blank if skipped above)
       default: ""
 
-    - name: user_password_confirm (leave blank if skipped above)
-      prompt: re-enter user password to confirm
+    - name: user_password_confirm
+      prompt: re-enter user password to confirm (leave blank if skipped above)
       default: ""
 
     - name: hostname
@@ -59,10 +59,10 @@
         name:
           #=== System / Shells / Core Tools ===
           - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
-          - less
           - linux-lts-headers          # Kernel headers for LTS kernel
           - man-db                     # Man pages database
           - openssh                    # SSH client/server
+          - less
           - tmux
           - unzip
           - usbutils
@@ -74,9 +74,9 @@
           #=== Audio / Media ===
           - alsa-utils                 # ALSA sound utilities (amixer, etc.)
           - pavucontrol                # GUI volume control for PipeWire/PulseAudio
-          - phonon-qt5-vlc             # Qt multimedia backend using VLC
           - pipewire                   # Next-gen audio/video server
           - wireplumber                # Session manager for PipeWire
+          - phonon-qt5-vlc             # Qt multimedia backend using VLC
 
           #=== Bluetooth ===
           - blueman                    # Bluetooth manager GUI
@@ -85,33 +85,30 @@
 
           #=== Networking / DNS / Security ===
           - bind                       # DNS tools (e.g. `dig`)
-          - ccid                       # Smart card CCID driver
           - dnscrypt-proxy             # DNS encryption (DoH/DoT)
-          - gnupg
-          - gocryptfs                  # Encrypted FUSE filesystem
-          - hopenpgp-tools             # Additional PGP utilities
-          - jq                         # JSON command-line processor
-          - network-manager-applet
-          - openvpn
-          - pass                       # GPG-based password manager
-          - pass-otp                   # OTP extension for pass
+          - ccid                       # Smart card CCID driver
           - pcsclite                   # Daemon to communicate with smartcards
-          - wireguard-tools            # VPN
+          - hopenpgp-tools             # Additional PGP utilities
           - yubikey-manager            # Manage YubiKeys
           - yubikey-personalization    # Configure YubiKey parameters
+          - gnupg
+          - gocryptfs                  # Encrypted FUSE filesystem
+          - jq                         # JSON command-line processor
+          - pass                       # GPG-based password manager
+          - pass-otp                   # OTP extension for pass
 
           #=== Cloud / CLI Tools ===
           - aws-cli-v2                 # AWS command-line interface
-          - fzf                        # Fuzzy finder for the command line
-          - gdb
           - ripgrep                    # Faster grep alternative
+          - fzf                        # Fuzzy finder for the command line
           - rustup                     # Rust toolchain installer
+          - gdb
 
           #=== File Management / GPU libs ===
-          - brightnessctl              # Control screen brightness via CLI
           - dolphin                    # KDE file manager
-          - libfido2                   # FIDO/U2F authentication library
           - libva                      # VA-API for video acceleration
+          - brightnessctl              # Control screen brightness via CLI
+          - libfido2                   # FIDO/U2F authentication library
           - zbar                       # Barcode/QR code scanner CLI tools
 
           #=== Containers ===
@@ -489,7 +486,7 @@
             aur_directories: "{{ aur_directories.files }}"
 
         - name: build aur packages
-          command: makepkg -sirc --noconfirm
+          command: makepkg -si --noconfirm
           args:
             chdir: "{{ item.path }}"
           with_items: "{{ aur_directories }}"
@@ -515,8 +512,6 @@
             dest: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/cmdline-tools/latest/bin"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         # Android sources
         - name: install android sources
@@ -525,8 +520,6 @@
             dest: "/home/{{ user }}/android-sdk/sources/android-34"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/sources/android-34/AndroidManifest.xml"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         - name: install android build-tools
           unarchive:
@@ -534,8 +527,6 @@
             dest: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1/bin"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         - name: install android platform-tools
           unarchive:
@@ -543,8 +534,6 @@
             dest: "/home/{{ user }}/android-sdk"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/platform-tools/adb"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         - name: install android platform 34-ext7
           unarchive:
@@ -552,8 +541,6 @@
             dest: "/home/{{ user }}/android-sdk/platforms"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/platforms/android-34-ext7/package.xml"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         - name: install android emulator
           unarchive:
@@ -561,8 +548,6 @@
             dest: "/home/{{ user }}/android-sdk/emulator"
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/emulator/emulator"
-          owner: "{{ user }}"
-          group: "{{ user }}"
 
         - name: point flutter to android-sdk
           command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
