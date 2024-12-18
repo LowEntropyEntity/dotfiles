@@ -419,7 +419,6 @@
             - "/home/{{ user }}/.config/containers/ungoogled-chrome"
             - "/home/{{ user }}/.config/containers/firefox"
 
-
         - name: configure rust
           command: rustup default stable
           args:
@@ -459,10 +458,11 @@
           args:
             chdir: "/home/{{ user }}/.dotfiles"
           register: debug
-          when: dotfiles_clone is changed or dotfiles.stat.exists
+          when: dotfiles_clone is changed or not dotfiles.stat.exists
 
         - debug:
             msg: "{{ debug.stdout }}"
+          when: dotfiles_clone is changed or not dotfiles.stat.exists
 
         - name: import gpg key
           command: gpg --locate-key sean@sean.xyz
@@ -597,20 +597,20 @@
             remote_src: yes
             creates: "/home/{{ user }}/android-sdk/emulator/emulator"
 
-        - name: point flutter to android-sdk
-          command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
-          args:
-            chdir: "/home/{{ user }}"
-          environment:
-            HOME: "/home/{{ user }}"
-          changed_when: false
-
-        - name: accept android-studio sdk licenses
-          shell: yes | flutter doctor --android-licenses
-          args:
-            chdir: "/home/{{ user }}"
-          environment:
-            HOME: "/home/{{ user }}"
+        # - name: point flutter to android-sdk
+        #   command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
+        #   args:
+        #     chdir: "/home/{{ user }}"
+        #   environment:
+        #     HOME: "/home/{{ user }}"
+        #   changed_when: false
+        #
+        # - name: accept android-studio sdk licenses
+        #   shell: yes | flutter doctor --android-licenses
+        #   args:
+        #     chdir: "/home/{{ user }}"
+        #   environment:
+        #     HOME: "/home/{{ user }}"
 
       become: true
       become_user: "{{ user }}"
@@ -619,4 +619,4 @@
       user:
         name: root
         password: "!"
-
+      when: ansible_user_id == '0'
