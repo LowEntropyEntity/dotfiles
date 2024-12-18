@@ -459,6 +459,7 @@
           args:
             chdir: "/home/{{ user }}/.dotfiles"
           register: debug
+          when: dotfiles_clone is changed or dotfiles.stat.exists
 
         - debug:
             msg: "{{ debug.stdout }}"
@@ -525,7 +526,7 @@
             # development
             - android-studio
             - aws-cli-v2-bin
-            - flutter
+            # this is failing: flutter
             - postman-bin
             - visual-studio-code-bin
           register: yay_install_results
