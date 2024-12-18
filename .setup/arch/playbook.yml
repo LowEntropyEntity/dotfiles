@@ -3,26 +3,37 @@
 
   vars_prompt:
 
-    - name: user
+    - name: user (leave blank to skip)
       prompt: enter non-root user name
       private: false
+      default: ""
 
-    - name: user_password
+    - name: user_password (leave blank if skipped above)
       prompt: enter user password
+      default: ""
 
-    - name: user_password_confirm
+    - name: user_password_confirm (leave blank if skipped above)
       prompt: re-enter user password to confirm
+      default: ""
 
     - name: hostname
-      prompt: enter hostname
+      prompt: enter hostname (leave blank to skip)
       private: false
+      default: ""
 
   tasks:
+
+    - name: fail if running as root but no user specified
+      assert:
+        that:
+          - not (ansible_user_id == '0' and user|length == 0)
+        fail_msg: "must specify a user when running as root"
 
     - name: validate password
       assert:
         that:
-          - user_password == user_password_confirm
+          - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
+        fail_msg: "password must match and not be empty if user is specified"
 
     # Attempt to detect NVIDIA GPU (optional). If detection fails or is not desired, you can prompt.
     - name: detect nvidia GPU
@@ -36,6 +47,7 @@
     - name: set hostname
       hostname:
         name: "{{ hostname }}"
+      when: hostname|length > 0 and hostname != ansible_hostname
 
     - name: pacman update
       pacman:
@@ -53,6 +65,7 @@
           - less
           - tmux
           - unzip
+          - usbutils
           - wget
           - xdg-user-dirs
           - zsh
@@ -283,12 +296,16 @@
     - name: get root partition device
       shell: df -h | grep '[[:space:]]/$' | cut -d ' ' -f1
       register: root_device
+      changed_when: false
+
     - set_fact:
         root_device: '{{ root_device.stdout }}'
 
     - name: set part_uuid variable
       shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
       register: part_uuid
+      changed_when: false
+
     - set_fact:
         part_uuid: '{{ part_uuid.stdout }}'
 
@@ -333,7 +350,7 @@
         dest: /etc/udev/rules.d/99-nvidia.rules
 
     - name: ignore lid closing (handled by hyprland)
-      ansible.builtin.lineinfile:
+      lineinfile:
         path: /etc/systemd/logind.conf
         regexp: '^(.*)HandleLidSwitch='
         line: "HandleLidSwitch=ignore"
@@ -342,6 +359,13 @@
       copy:
         content: "%wheel ALL=(ALL) NOPASSWD: ALL\n"
         dest: "/etc/sudoers.d/wheel"
+
+    - name: check if user exists
+      command: id -u {{ user }}
+      register: user_id
+      failed_when: false
+      changed_when: false
+      when: ansible_user_id == '0' and user|length > 0
 
     - name: create user
       user:
@@ -353,6 +377,12 @@
         name: "{{ user }}"
         password: "{{ user_password | password_hash('sha512') }}"
         shell: /usr/bin/zsh
+      when: ansible_user_id == '0' and user|length > 0 and user_id.rc != 0
+
+    - name: set user to current user if no user given
+      set_fact:
+        user: "{{ ansible_user }}"
+      when: user|length == 0
 
     - name: user specific
       block:
@@ -372,8 +402,23 @@
             -  "/home/{{ user }}/screenshots"
             -  "/home/{{ user }}/templates"
 
+        - name: create containers dirs
+          file:
+            path: "{{ item }}"
+            state: directory
+            owner: "{{ user }}"
+            group: "{{ user }}"
+          loop:
+            - "/home/{{ user }}/.config/containers/ungoogled-chrome"
+            - "/home/{{ user }}/.config/containers/firefox"
+
+
         - name: configure rust
           command: rustup default stable
+          args:
+            chdir: "/home/{{ user }}"
+          environment:
+            HOME: "/home/{{ user }}"
 
         - name: check if dotfiles are downloaded
           stat: "path=/home/{{ user }}/.dotfiles"
@@ -385,6 +430,7 @@
             repo: https://github.com/LowEntropyEntity/.dotfiles.git
             dest: "/home/{{ user }}/.dotfiles/"
             bare: yes
+          register: dotfiles_clone
 
         - name: set dotfiles push remote
           git_config:
@@ -392,6 +438,7 @@
             value: git@github.com:LowEntropyEntity/.dotfiles.git
             repo: "/home/{{ user }}/.dotfiles"
             scope: local
+          when: dotfiles_clone is changed or dotfiles.stat.exists
 
         - name: configure dotfiles to not show untracked files
           git_config:
@@ -405,20 +452,27 @@
           args:
             chdir: "/home/{{ user }}/.dotfiles"
           register: debug
+
         - debug:
             msg: "{{ debug.stdout }}"
 
         - name: import gpg key
           command: gpg --locate-key sean@sean.xyz
+          args:
+            chdir: "/home/{{ user }}"
+          register: gpg_key_check
+          changed_when: false
 
         - name: trust gpg key
           shell: echo "1F86464D595F2DCD5F6029B6E81D523E5DD412E2:6:" | gpg --import-ownertrust
+          when: "'1F86464D595F2DCD5F6029B6E81D523E5DD412E2' not in gpg_key_check.stdout"
 
         - name: sync submodules
           shell: "git --git-dir=/home/{{ user }}/.dotfiles/ --work-tree=/home/{{ user }} submodule update --init"
           args:
             chdir: "/home/{{ user }}/.dotfiles"
           register: debug
+
         - debug:
             msg: "{{ debug.stdout }}"
 
@@ -427,6 +481,7 @@
             paths: "/home/{{ user }}/.src/aur.archlinux.org/"
             file_type: directory
           register: aur_directories
+
         - set_fact:
             aur_directories: "{{ aur_directories.files }}"
 
@@ -435,101 +490,91 @@
           args:
             chdir: "{{ item.path }}"
           with_items: "{{ aur_directories }}"
+          when: aur_directories|length > 0
 
         - name: reset android studio sdk directory
           file:
             path: "/home/{{ user }}/android-sdk"
             state: absent
 
-        - name: create android studio platforms directory
+        - name: create android studio dirs
           file:
-            path: "/home/{{ user }}/android-sdk/platforms"
+            path: "{{ item }}"
             state: directory
+          loop:
+            - "/home/{{ user }}/android-sdk/platforms"
+            - "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+            - "/home/{{ user }}/android-sdk/build-tools/35.0.0"
 
-        - name: create android studio cmdline-tools directory
-          file:
-            path: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
-            state: directory
-
-        - name: create android studio build-tools directory
-          file:
-            path: "/home/{{ user }}/android-sdk/build-tools/35.0.0"
-            state: directory
-
-        - name: download android cmdline-tools
-          get_url:
-            url: https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
-            dest: /tmp/android-commandlinetools.zip
-
-        - name: unzip android cmdline-tools
+        - name: install android cmdline-tools
           unarchive:
-            src: /tmp/android-commandlinetools.zip
-            dest: /tmp
+            src: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            dest: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/cmdline-tools/latest/bin"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
-        - name: move android cmdline-tools to proper location
-          shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/android-sdk/cmdline-tools/latest"
-
-        - name: download android sources
-          get_url:
-            url: https://dl.google.com/android/repository/sources-34_r01.zip
-            dest: /tmp/sources.zip
-
-        - name: unzip android sources
+        # Android sources
+        - name: install android sources
           unarchive:
-            src: /tmp/sources.zip
-            dest: /tmp
+            src: "https://dl.google.com/android/repository/sources-34_r01.zip"
+            dest: "/home/{{ user }}/android-sdk/sources/android-34"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/sources/android-34/AndroidManifest.xml"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
-        - name: move android sources to proper location
-          shell: "mv /tmp/src/* /home/{{ user }}/android-sdk/sources/android-34"
-
-        - name: download android build-tools
-          get_url:
-            url: https://dl.google.com/android/repository/build-tools_r36-rc1_linux.zip
-            dest: /tmp/build-tools.zip
-
-        - name: unzip android build-tools
+        - name: install android build-tools
           unarchive:
-            src: /tmp/build-tools.zip
-            dest: /tmp
+            src: "https://dl.google.com/android/repository/build-tools_r36-rc1_linux.zip"
+            dest: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1/bin"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
-        - name: move android build-tools to proper location
-          shell: "mv /tmp/android-Baklava/* /home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
-
-        - name: download android platform-tools
-          get_url:
-            url: https://dl.google.com/android/repository/platform-tools-latest-linux.zip
-            dest: /tmp/platform-tools.zip
-
-        - name: unzip android platform-tools
+        - name: install android platform-tools
           unarchive:
-            src: /tmp/platform-tools.zip
+            src: "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
             dest: "/home/{{ user }}/android-sdk"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/platform-tools/adb"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
-        - name: download android platform
-          get_url:
-            url: https://dl.google.com/android/repository/platform-34-ext7_r02.zip
-            dest: /tmp/platform-34.zip
-
-        - name: unzip android platform
+        - name: install android platform 34-ext7
           unarchive:
-            src: /tmp/platform-34.zip
+            src: "https://dl.google.com/android/repository/platform-34-ext7_r02.zip"
             dest: "/home/{{ user }}/android-sdk/platforms"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/platforms/android-34-ext7/package.xml"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
-        - name: download android emulator
-          get_url:
-            url: https://dl.google.com/android/repository/emulator-linux_x64-12414864.zip
-            dest: /tmp/emulator-linux.zip
-
-        - name: unzip android emulator
+        - name: install android emulator
           unarchive:
-            src: /tmp/emulator-linux.zip
+            src: "https://dl.google.com/android/repository/emulator-linux_x64-12414864.zip"
             dest: "/home/{{ user }}/android-sdk/emulator"
+            remote_src: yes
+            creates: "/home/{{ user }}/android-sdk/emulator/emulator"
+          owner: "{{ user }}"
+          group: "{{ user }}"
 
         - name: point flutter to android-sdk
           command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
+          args:
+            chdir: "/home/{{ user }}"
+          environment:
+            HOME: "/home/{{ user }}"
+          changed_when: false
 
         - name: accept android-studio sdk licenses
           shell: yes | flutter doctor --android-licenses
+          args:
+            chdir: "/home/{{ user }}"
+          environment:
+            HOME: "/home/{{ user }}"
 
       become: true
       become_user: "{{ user }}"

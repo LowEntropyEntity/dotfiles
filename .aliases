@@ -1,38 +1,70 @@
+### directory navigation and stack
 alias cd='pushd > /dev/null'
 alias p='popd'
+alias ..='pushd ..'
+alias ...='pushd ../..'
+alias ....='pushd ../../..'
 
-alias ai='chatgpt'
-alias aws-login='aws sso login --profile'
+### searching and listing
+if command -v grep &>/dev/null; then
+	alias grep='rg --color=auto'
+fi
 
-alias cat='bat --style=plain'
+if command -v fd &>/dev/null; then
+	alias find='fd --hidden --follow'
+fi
 
-alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
+alias findfile='find . | grep' # find file by name
 
+### file listing and viewing
+if command -v bat &>/dev/null; then
+	alias cat='bat --style=plain'
+fi
+if command -v eza &>/dev/null; then
+	alias l='eza -1 --classify'
+	alias la='eza -1 -a --classify'
+	alias ll='eza -l --classify'
+	alias lla='eza -l -a --classify'
+else
+	alias l='ls -1FG'
+	alias la='ls -1AFG'
+	alias ll='ls -lFG'
+	alias lla='ls -lAFG'
+fi
+
+### dotfiles and git
 alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout && echo "dotfiles synced successfully"'
 
-alias find='fd'
-alias findfile='fd . | grep'	# find file by name
+### networking
+alias lsports='ss -tulpn'
 
-alias grep='rg'
+### datetime
+alias now='date +"%F %T"'
 
-alias l='eza -1 --classify'           # List file name only, slashes after directories, color by default
-alias la='eza -1 -a --classify'       # Include hidden files, slashes after directories, color by default
-alias ll='eza -l --classify'          # Long format, slashes after directories, color by default
-alias lla='eza -l -a --classify'      # Long format, include hidden files, slashes after directories, color by default
-
-alias now='\date +"%F %T"'
-
-alias stealth='set +o history'	# stop writing commands to history
-alias .stealth='set -o history'	# resume writing commands to history
-
-alias totp='oathtool --base32 --totp'
-
+### clipboard/sharing
 alias share-dir='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
 alias share-dir-git='(git ls-tree -r --name-only HEAD; echo; git ls-tree -r --name-only HEAD | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
 
-alias sudo='sudo '	# makes aliases available in sudo
+### security and auth
+alias totp='oathtool --base32 --totp'
 
+### aws and ai
+alias aws-login='aws sso login --profile'
+alias ai='chatgpt'
+
+### browsers
+alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
+alias chromium-docker="docker exec -it ungoogled-chromium /opt/ungoogledchromium/chrome --ozone-platform=wayland --no-sandbox --new-window"
+
+### shell history/stealth
+alias stealth='set +o history'
+alias .stealth='set -o history'
+
+### sudo alias (to allow aliases under sudo)
+alias sudo='sudo '
+
+### compression and archives
 alias gz='gzip'
 alias tar.gz='tar-gz'
 alias tgz='tar -cvzf'
@@ -42,26 +74,44 @@ alias .tar.xz='.tar'
 alias .gz='gzip -d'
 alias .tgz='tar -xvf'
 
+### temporary dirs and files
 alias tmp='cd $(mktemp -d)'
 alias tmp.='cd $(mktemp -d --tmpdir=./)'
 alias tmpfile='mktemp'
 alias tmpfile.='mktemp --tmpdir=./'
 
+### removing and shredding
 alias rm.='rm -frv $(pwd) && p'
 alias srm='shred -u -z'
 
+### audio testing
 alias speakers='speaker-test -t wav -c 2'
 
+### adb and mirroring
 alias adbmirror='adb shell screenrecord --output-format=h264 - | ffplay -framerate 60 -probesize 32 -sync video -'
 
+### dockerized redis
 alias redis='docker run --rm -p 6379:6379 redis'
 
-alias vim='nvim'
+### editor
+if command -v nvim &>/dev/null; then
+	alias vim='nvim'
+	alias vi='nvim'
+elif command -v vim &>/dev/null; then
+	alias vi='vim'
+elif command -v vi &>/dev/null; then
+	alias vim='vi'
+fi
 
+### vpn
 alias vpn='sudo openconnect corp-vpn.sonos.com -u sean.simonsen --useragent=AnyConnect'
 
+### zsh reload
 alias zshrc='omz reload'
 
-alias -g -- -h='-h 2>&1 | { bat --language=help --style=plain || \cat; }'
-alias -g -- --help='--help 2>&1 | { bat --language=help --style=plain || \cat; }'
+# global aliases
+if command -v bat &>/dev/null; then
+	alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
+	alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+fi
 
