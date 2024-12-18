@@ -132,8 +132,10 @@
             name:
               - clang
               - cmake
+              - dart
               - go
-              - mitmproxy                  # Interactive HTTPS proxy
+              - gradle
+              - mitmproxy
               - nodejs
               - npm
 
@@ -152,7 +154,7 @@
               - eza                        # ls
 
               #=== Wayland Compositor & Related Tools ===
-              - hyprland                   # Wayland compositor
+              - hyprland
               - hyprpicker                 # Color picker for Wayland
               - grim                       # Screenshot tool for Wayland
               - slurp                      # Select regions in Wayland (e.g. screenshot)
@@ -174,8 +176,8 @@
 
               #=== GPU / Multimedia Tools ===
               - obs-studio                 # Video recording/streaming
-              - speedcrunch                # High-precision calculator
-              - spotify-launcher           # Spotify launcher
+              - speedcrunch                # calculator
+              - spotify-launcher
               - udiskie                    # Automount tool for removable media
               - vlc
               - polkit-kde-agent           # Polkit auth agent for KDE
@@ -499,23 +501,40 @@
 
         - name: install aur packages with yay
           command: yay -S --noconfirm {{ item }}
+          ignore_errors: true
           with_items:
-            - android-studio
-            - aws-cli-v2-bin
-            - chatgpt-shell-cli
-            - flutter
-            - grimblast-git
-            - i2p
-            - jan-bin
             - java-service-wrapper
-            - keybase-bin
-            - postman-bin
-            - python-huggingface-hub
-            - slack-desktop
             - swaylock-effects
             - swww
-            - visual-studio-code-bin
+
+            # ai
+            - chatgpt-shell-cli
+            - jan-bin
+            - python-huggingface-hub
+            - grimblast-git
+
+            # privacy / security
+            - i2p
+            - keybase-bin
+            - proton-vpn-gtk-app
+
+            # collaboration
+            - slack-desktop
             - zoom
+
+            # development
+            - android-studio
+            - aws-cli-v2-bin
+            - flutter
+            - postman-bin
+            - visual-studio-code-bin
+          register: yay_install_results
+
+        - name: show yay installation failures
+          debug:
+            msg: "Failed to install {{ item.item }}: {{ item.stderr }}"
+          with_items: "{{ yay_install_results.results }}"
+          when: item.rc != 0
 
         - name: reset android studio sdk directory
           file:
