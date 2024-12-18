@@ -23,365 +23,370 @@
 
   tasks:
 
-    - name: fail if running as root but no user specified
-      assert:
-        that:
-          - not (ansible_user_id == '0' and user|length == 0)
-        fail_msg: "must specify a user when running as root"
+    - name: root specific
+      block:
 
-    - name: validate password
-      assert:
-        that:
-          - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
-        fail_msg: "password must match and not be empty if user is specified"
+        - name: fail if running as root but no user specified
+          assert:
+            that:
+              - not (ansible_user_id == '0' and user|length == 0)
+            fail_msg: "must specify a user when running as root"
 
-    # Attempt to detect NVIDIA GPU (optional). If detection fails or is not desired, you can prompt.
-    - name: detect nvidia GPU
-      shell: "lspci | grep -i nvidia"
-      register: nvidia_check
-      changed_when: false
+        - name: validate password
+          assert:
+            that:
+              - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
+            fail_msg: "password must match and not be empty if user is specified"
 
-    - set_fact:
-        has_nvidia: "{{ nvidia_check.stdout != '' }}"
+        # Attempt to detect NVIDIA GPU (optional). If detection fails or is not desired, you can prompt.
+        - name: detect nvidia GPU
+          shell: "lspci | grep -i nvidia"
+          register: nvidia_check
+          changed_when: false
 
-    - name: set hostname
-      hostname:
-        name: "{{ hostname }}"
-      when: hostname|length > 0 and hostname != ansible_hostname
+        - set_fact:
+            has_nvidia: "{{ nvidia_check.stdout != '' }}"
 
-    - name: pacman update
-      pacman:
-        update_cache: true
-        upgrade: true
+        - name: set hostname
+          hostname:
+            name: "{{ hostname }}"
+          when: hostname|length > 0 and hostname != ansible_hostname
 
-    - name: install base apps
-      pacman:
-        name:
-          #=== System / Shells / Core Tools ===
-          - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
-          - linux-lts-headers          # Kernel headers for LTS kernel
-          - man-db                     # Man pages database
-          - openssh                    # SSH client/server
-          - less
-          - tmux
-          - unzip
-          - usbutils
-          - wget
-          - xdg-user-dirs
-          - zsh
-          - zsh-completions
+        - name: pacman update
+          pacman:
+            update_cache: true
+            upgrade: true
 
-          #=== Audio / Media ===
-          - alsa-utils                 # ALSA sound utilities (amixer, etc.)
-          - pavucontrol                # GUI volume control for PipeWire/PulseAudio
-          - pipewire                   # Next-gen audio/video server
-          - wireplumber                # Session manager for PipeWire
-          - phonon-qt5-vlc             # Qt multimedia backend using VLC
+        - name: install base apps
+          pacman:
+            name:
+              #=== System / Shells / Core Tools ===
+              - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
+              - linux-lts-headers          # Kernel headers for LTS kernel
+              - man-db                     # Man pages database
+              - openssh                    # SSH client/server
+              - less
+              - tmux
+              - unzip
+              - usbutils
+              - wget
+              - xdg-user-dirs
+              - zsh
+              - zsh-completions
 
-          #=== Bluetooth ===
-          - blueman                    # Bluetooth manager GUI
-          - bluez                      # Official Bluetooth protocol stack
-          - bluez-utils                # Bluetooth command-line utilities
+              #=== Audio / Media ===
+              - alsa-utils                 # ALSA sound utilities (amixer, etc.)
+              - pavucontrol                # GUI volume control for PipeWire/PulseAudio
+              - pipewire                   # Next-gen audio/video server
+              - wireplumber                # Session manager for PipeWire
+              - phonon-qt5-vlc             # Qt multimedia backend using VLC
 
-          #=== Networking / DNS / Security ===
-          - bind                       # DNS tools (e.g. `dig`)
-          - dnscrypt-proxy             # DNS encryption (DoH/DoT)
-          - ccid                       # Smart card CCID driver
-          - pcsclite                   # Daemon to communicate with smartcards
-          - hopenpgp-tools             # Additional PGP utilities
-          - yubikey-manager            # Manage YubiKeys
-          - yubikey-personalization    # Configure YubiKey parameters
-          - gnupg
-          - gocryptfs                  # Encrypted FUSE filesystem
-          - jq                         # JSON command-line processor
-          - pass                       # GPG-based password manager
-          - pass-otp                   # OTP extension for pass
+              #=== Bluetooth ===
+              - blueman                    # Bluetooth manager GUI
+              - bluez                      # Official Bluetooth protocol stack
+              - bluez-utils                # Bluetooth command-line utilities
 
-          #=== Cloud / CLI Tools ===
-          - aws-cli-v2                 # AWS command-line interface
-          - ripgrep                    # Faster grep alternative
-          - fzf                        # Fuzzy finder for the command line
-          - rustup                     # Rust toolchain installer
-          - gdb
+              #=== Networking / DNS / Security ===
+              - bind                       # DNS tools (e.g. `dig`)
+              - dnscrypt-proxy             # DNS encryption (DoH/DoT)
+              - ccid                       # Smart card CCID driver
+              - pcsclite                   # Daemon to communicate with smartcards
+              - hopenpgp-tools             # Additional PGP utilities
+              - yubikey-manager            # Manage YubiKeys
+              - yubikey-personalization    # Configure YubiKey parameters
+              - gnupg
+              - gocryptfs                  # Encrypted FUSE filesystem
+              - jq                         # JSON command-line processor
+              - pass                       # GPG-based password manager
+              - pass-otp                   # OTP extension for pass
 
-          #=== File Management / GPU libs ===
-          - dolphin                    # KDE file manager
-          - libva                      # VA-API for video acceleration
-          - brightnessctl              # Control screen brightness via CLI
-          - libfido2                   # FIDO/U2F authentication library
-          - zbar                       # Barcode/QR code scanner CLI tools
+              #=== Cloud / CLI Tools ===
+              - aws-cli-v2                 # AWS command-line interface
+              - ripgrep                    # Faster grep alternative
+              - fzf                        # Fuzzy finder for the command line
+              - rustup                     # Rust toolchain installer
+              - gdb
 
-          #=== Containers ===
-          - docker
-          - docker-compose
+              #=== File Management / GPU libs ===
+              - dolphin                    # KDE file manager
+              - libva                      # VA-API for video acceleration
+              - brightnessctl              # Control screen brightness via CLI
+              - libfido2                   # FIDO/U2F authentication library
+              - zbar                       # Barcode/QR code scanner CLI tools
 
-          #=== Wayland / Display Utilities ===
-          - mako                       # Wayland notification daemon
-          - usbip                      # USB over IP utility
-          - wl-clipboard               # Wayland clipboard utilities
+              #=== Containers ===
+              - docker
+              - docker-compose
 
-          #=== Additional Common Tools ===
-          - git
-          - git-lfs
+              #=== Wayland / Display Utilities ===
+              - mako                       # Wayland notification daemon
+              - usbip                      # USB over IP utility
+              - wl-clipboard               # Wayland clipboard utilities
 
-    - name: install development apps
-      pacman:
-        name:
-          - clang
-          - cmake
-          - go
-          - mitmproxy                  # Interactive HTTPS proxy
-          - nodejs
-          - npm
+              #=== Additional Common Tools ===
+              - git
+              - git-lfs
 
-    - name: install visual apps
-      pacman:
-        name:
-          #=== Terminal / Browsers / Editors ===
-          - alacritty
-          - chromium
-          - neovim
-          - blender
+        - name: install development apps
+          pacman:
+            name:
+              - clang
+              - cmake
+              - go
+              - mitmproxy                  # Interactive HTTPS proxy
+              - nodejs
+              - npm
 
-          #=== Linux command replacements ===
-          - bat                        # cat
-          - fd                         # find
-          - eza                        # ls
+        - name: install visual apps
+          pacman:
+            name:
+              #=== Terminal / Browsers / Editors ===
+              - alacritty
+              - chromium
+              - neovim
+              - blender
 
-          #=== Wayland Compositor & Related Tools ===
-          - hyprland                   # Wayland compositor
-          - hyprpicker                 # Color picker for Wayland
-          - grim                       # Screenshot tool for Wayland
-          - slurp                      # Select regions in Wayland (e.g. screenshot)
-          - swayidle                   # Idle management for Wayland
-          - waybar                     # Customizable Wayland status bar
-          - waylock                    # Screen locker for Wayland
-          - wf-recorder                # Screen recorder for Wayland
-          - wofi                       # Wayland application launcher
-          - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
+              #=== Linux command replacements ===
+              - bat                        # cat
+              - fd                         # find
+              - eza                        # ls
 
-          #=== Fonts / Theming / Qt Integration ===
-          - font-manager
-          - noto-fonts-emoji
-          - ttf-hack-nerd
-          - ttf-jetbrains-mono-nerd
-          - qt5ct                      # Qt5 configuration tool
-          - qt5-wayland                # Wayland support for Qt5 apps
-          - qt6-wayland                # Wayland support for Qt6 apps
+              #=== Wayland Compositor & Related Tools ===
+              - hyprland                   # Wayland compositor
+              - hyprpicker                 # Color picker for Wayland
+              - grim                       # Screenshot tool for Wayland
+              - slurp                      # Select regions in Wayland (e.g. screenshot)
+              - swayidle                   # Idle management for Wayland
+              - waybar                     # Customizable Wayland status bar
+              - waylock                    # Screen locker for Wayland
+              - wf-recorder                # Screen recorder for Wayland
+              - wofi                       # Wayland application launcher
+              - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
 
-          #=== GPU / Multimedia Tools ===
-          - obs-studio                 # Video recording/streaming
-          - speedcrunch                # High-precision calculator
-          - spotify-launcher           # Spotify launcher
-          - udiskie                    # Automount tool for removable media
-          - vlc
-          - polkit-kde-agent           # Polkit auth agent for KDE
-          - v4l2loopback-dkms          # Virtual V4L2 camera device module
+              #=== Fonts / Theming / Qt Integration ===
+              - font-manager
+              - noto-fonts-emoji
+              - ttf-hack-nerd
+              - ttf-jetbrains-mono-nerd
+              - qt5ct                      # Qt5 configuration tool
+              - qt5-wayland                # Wayland support for Qt5 apps
+              - qt6-wayland                # Wayland support for Qt6 apps
 
-          #=== development tools ===
-          - git-delta
+              #=== GPU / Multimedia Tools ===
+              - obs-studio                 # Video recording/streaming
+              - speedcrunch                # High-precision calculator
+              - spotify-launcher           # Spotify launcher
+              - udiskie                    # Automount tool for removable media
+              - vlc
+              - polkit-kde-agent           # Polkit auth agent for KDE
+              - v4l2loopback-dkms          # Virtual V4L2 camera device module
 
-    - name: install nvidia-related packages
-      pacman:
-        name:
-          - cuda                       # NVIDIA GPU compute toolkit
-          - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
-        state: present
-      when: has_nvidia
+              #=== development tools ===
+              - git-delta
 
-    - name: install utilities
-      pacman:
-        name:
-          - cups                       # Printing system
+        - name: install nvidia-related packages
+          pacman:
+            name:
+              - cuda                       # NVIDIA GPU compute toolkit
+              - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
+            state: present
+          when: has_nvidia
 
-    - name: configure dnscrypt-proxy for DoH
-      copy:
-        content: |
-          server_names = ['cloudflare', 'google']
-        dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
-        owner: root
-        group: root
-        mode: '0644'
+        - name: install utilities
+          pacman:
+            name:
+              - cups                       # Printing system
 
-    - name: enable dnscrypt-proxy
-      systemd_service:
-        name: dnscrypt-proxy.service
-        enabled: true
-        state: started
+        - name: configure dnscrypt-proxy for DoH
+          copy:
+            content: |
+              server_names = ['cloudflare', 'google']
+            dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+            owner: root
+            group: root
+            mode: '0644'
 
-    - name: update /etc/resolv.conf to use dnscrypt-proxy
-      lineinfile:
-        path: /etc/resolv.conf
-        regexp: '^nameserver '
-        line: 'nameserver 127.0.0.1'
+        - name: enable dnscrypt-proxy
+          systemd_service:
+            name: dnscrypt-proxy.service
+            enabled: true
+            state: started
 
-    - name: disable NetworkManager DNS overwrites
-      copy:
-        dest: /etc/NetworkManager/conf.d/dns-override.conf
-        owner: root
-        group: root
-        mode: '0644'
-        content: |
-          [main]
-          dns=none
+        - name: update /etc/resolv.conf to use dnscrypt-proxy
+          lineinfile:
+            path: /etc/resolv.conf
+            regexp: '^nameserver '
+            line: 'nameserver 127.0.0.1'
 
-    - name: restart NetworkManager
-      systemd:
-        name: NetworkManager
-        state: restarted
+        - name: disable NetworkManager DNS overwrites
+          copy:
+            dest: /etc/NetworkManager/conf.d/dns-override.conf
+            owner: root
+            group: root
+            mode: '0644'
+            content: |
+              [main]
+              dns=none
 
-    - name: configure ssh
-      get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/20-force_publickey_auth.conf
-        dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
+        - name: restart NetworkManager
+          systemd:
+            name: NetworkManager
+            state: restarted
 
-    - name: enable sshd
-      systemd_service:
-        name: sshd
-        enabled: true
-        state: started
+        - name: configure ssh
+          get_url:
+            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/20-force_publickey_auth.conf
+            dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
 
-    - name: enable timesync
-      systemd_service:
-        name: systemd-timesyncd
-        enabled: true
-        state: started
+        - name: enable sshd
+          systemd_service:
+            name: sshd
+            enabled: true
+            state: started
 
-    - name: enable docker
-      systemd_service:
-        name: docker
-        enabled: true
-        state: started
+        - name: enable timesync
+          systemd_service:
+            name: systemd-timesyncd
+            enabled: true
+            state: started
 
-    - name: enable bluetooth
-      systemd_service:
-        name: bluetooth
-        enabled: true
-        state: started
+        - name: enable docker
+          systemd_service:
+            name: docker
+            enabled: true
+            state: started
 
-    - name: enable nvidia-hibernate
-      systemd_service:
-        name: nvidia-hibernate
-        enabled: true
-      when: has_nvidia
+        - name: enable bluetooth
+          systemd_service:
+            name: bluetooth
+            enabled: true
+            state: started
 
-    - name: enable nvidia-resume
-      systemd_service:
-        name: nvidia-resume
-        enabled: true
-      when: has_nvidia
+        - name: enable nvidia-hibernate
+          systemd_service:
+            name: nvidia-hibernate
+            enabled: true
+          when: has_nvidia
 
-    - name: enable nvidia-suspend
-      systemd_service:
-        name: nvidia-suspend
-        enabled: true
-      when: has_nvidia
+        - name: enable nvidia-resume
+          systemd_service:
+            name: nvidia-resume
+            enabled: true
+          when: has_nvidia
 
-    - name: enable printing
-      systemd_service:
-        name: cups
-        enabled: true
-        state: started
+        - name: enable nvidia-suspend
+          systemd_service:
+            name: nvidia-suspend
+            enabled: true
+          when: has_nvidia
 
-    - name: delete waybar config (will come from dotfiles later)
-      file:
-        path: /etc/xdg/waybar
-        state: absent
+        - name: enable printing
+          systemd_service:
+            name: cups
+            enabled: true
+            state: started
 
-    - name: create boot loader config
-      get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/loader.conf
-        dest: /boot/loader/loader.conf
+        - name: delete waybar config (will come from dotfiles later)
+          file:
+            path: /etc/xdg/waybar
+            state: absent
 
-    - name: get root partition device
-      shell: df -h | grep '[[:space:]]/$' | cut -d ' ' -f1
-      register: root_device
-      changed_when: false
+        - name: create boot loader config
+          get_url:
+            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/loader.conf
+            dest: /boot/loader/loader.conf
 
-    - set_fact:
-        root_device: '{{ root_device.stdout }}'
+        - name: get root partition device
+          shell: df -h | grep '[[:space:]]/$' | cut -d ' ' -f1
+          register: root_device
+          changed_when: false
 
-    - name: set part_uuid variable
-      shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
-      register: part_uuid
-      changed_when: false
+        - set_fact:
+            root_device: '{{ root_device.stdout }}'
 
-    - set_fact:
-        part_uuid: '{{ part_uuid.stdout }}'
+        - name: set part_uuid variable
+          shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
+          register: part_uuid
+          changed_when: false
 
-    - name: fetch boot loader entry template
-      get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch.conf
-        dest: ./arch.conf
+        - set_fact:
+            part_uuid: '{{ part_uuid.stdout }}'
 
-    - name: fetch boot loader fallback entry template
-      get_url:
-        url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
-        dest: ./arch-fallback.conf
+        - name: fetch boot loader entry template
+          get_url:
+            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch.conf
+            dest: ./arch.conf
 
-    - name: create boot loader entry
-      template:
-        src: arch.conf
-        dest: /boot/loader/entries/arch.conf
+        - name: fetch boot loader fallback entry template
+          get_url:
+            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
+            dest: ./arch-fallback.conf
 
-    - name: create boot loader fallback entry
-      template:
-        src: arch-fallback.conf
-        dest: /boot/loader/entries/arch-fallback.conf
+        - name: create boot loader entry
+          template:
+            src: arch.conf
+            dest: /boot/loader/entries/arch.conf
 
-    - name: configure ramdisk
-      get_url:
-        url: "https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/mkinitcpio{{ '-nvidia' if has_nvidia else '' }}.conf"
-        dest: /etc/mkinitcpio.conf
+        - name: create boot loader fallback entry
+          template:
+            src: arch-fallback.conf
+            dest: /boot/loader/entries/arch-fallback.conf
 
-    - name: create ramdisk
-      command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
+        - name: configure ramdisk
+          get_url:
+            url: "https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/mkinitcpio{{ '-nvidia' if has_nvidia else '' }}.conf"
+            dest: /etc/mkinitcpio.conf
 
-    - name: configure modprobe
-      copy:
-        content: |
-          options nvidia-drm modeset=1
-          options nvidia NVreg_PreserveVideoMemoryAllocations=1
-        dest: /etc/modprobe.d/nvidia.conf
+        - name: create ramdisk
+          command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
 
-    - name: configure nvidia udev rule
-      copy:
-        content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
-        dest: /etc/udev/rules.d/99-nvidia.rules
+        - name: configure modprobe
+          copy:
+            content: |
+              options nvidia-drm modeset=1
+              options nvidia NVreg_PreserveVideoMemoryAllocations=1
+            dest: /etc/modprobe.d/nvidia.conf
 
-    - name: ignore lid closing (handled by hyprland)
-      lineinfile:
-        path: /etc/systemd/logind.conf
-        regexp: '^(.*)HandleLidSwitch='
-        line: "HandleLidSwitch=ignore"
+        - name: configure nvidia udev rule
+          copy:
+            content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
+            dest: /etc/udev/rules.d/99-nvidia.rules
 
-    - name: grant wheel group sudo
-      copy:
-        content: "%wheel ALL=(ALL) NOPASSWD: ALL\n"
-        dest: "/etc/sudoers.d/wheel"
+        - name: ignore lid closing (handled by hyprland)
+          lineinfile:
+            path: /etc/systemd/logind.conf
+            regexp: '^(.*)HandleLidSwitch='
+            line: "HandleLidSwitch=ignore"
 
-    - name: check if user exists
-      command: id -u {{ user }}
-      register: user_id
-      failed_when: false
-      changed_when: false
-      when: ansible_user_id == '0' and user|length > 0
+        - name: grant wheel group sudo
+          copy:
+            content: "%wheel ALL=(ALL) NOPASSWD: ALL\n"
+            dest: "/etc/sudoers.d/wheel"
 
-    - name: create user
-      user:
-        append: true
-        groups:
-          - docker
-          - input
-          - wheel
-        name: "{{ user }}"
-        password: "{{ user_password | password_hash('sha512') }}"
-        shell: /usr/bin/zsh
-      when: ansible_user_id == '0' and user|length > 0 and user_id.rc != 0
+        - name: check if user exists
+          command: id -u {{ user }}
+          register: user_id
+          failed_when: false
+          changed_when: false
+          when: user|length > 0
+
+        - name: create user
+          user:
+            append: true
+            groups:
+              - docker
+              - input
+              - wheel
+            name: "{{ user }}"
+            password: "{{ user_password | password_hash('sha512') }}"
+            shell: /usr/bin/zsh
+          when: user|length > 0 and user_id.rc != 0
+
+      when: ansible_user_id == '0'
 
     - name: set user to current user if no user given
       set_fact:
-        user: "{{ ansible_user }}"
+        user: "{{ ansible_env.USER }}"
       when: user|length == 0
 
     - name: user specific
@@ -503,8 +508,11 @@
             state: directory
           loop:
             - "/home/{{ user }}/android-sdk/platforms"
+            - "/home/{{ user }}/android-sdk/emulator"
             - "/home/{{ user }}/android-sdk/cmdline-tools/latest"
             - "/home/{{ user }}/android-sdk/build-tools/35.0.0"
+            - "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
+            - "/home/{{ user }}/android-sdk/sources/android-34"
 
         - name: install android cmdline-tools
           unarchive:
