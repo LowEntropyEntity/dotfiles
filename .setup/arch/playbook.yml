@@ -59,10 +59,10 @@
         name:
           #=== System / Shells / Core Tools ===
           - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
+          - less
           - linux-lts-headers          # Kernel headers for LTS kernel
           - man-db                     # Man pages database
           - openssh                    # SSH client/server
-          - less
           - tmux
           - unzip
           - usbutils
@@ -74,9 +74,9 @@
           #=== Audio / Media ===
           - alsa-utils                 # ALSA sound utilities (amixer, etc.)
           - pavucontrol                # GUI volume control for PipeWire/PulseAudio
+          - phonon-qt5-vlc             # Qt multimedia backend using VLC
           - pipewire                   # Next-gen audio/video server
           - wireplumber                # Session manager for PipeWire
-          - phonon-qt5-vlc             # Qt multimedia backend using VLC
 
           #=== Bluetooth ===
           - blueman                    # Bluetooth manager GUI
@@ -85,30 +85,33 @@
 
           #=== Networking / DNS / Security ===
           - bind                       # DNS tools (e.g. `dig`)
-          - dnscrypt-proxy             # DNS encryption (DoH/DoT)
           - ccid                       # Smart card CCID driver
-          - pcsclite                   # Daemon to communicate with smartcards
-          - hopenpgp-tools             # Additional PGP utilities
-          - yubikey-manager            # Manage YubiKeys
-          - yubikey-personalization    # Configure YubiKey parameters
+          - dnscrypt-proxy             # DNS encryption (DoH/DoT)
           - gnupg
           - gocryptfs                  # Encrypted FUSE filesystem
+          - hopenpgp-tools             # Additional PGP utilities
           - jq                         # JSON command-line processor
+          - network-manager-applet
+          - openvpn
           - pass                       # GPG-based password manager
           - pass-otp                   # OTP extension for pass
+          - pcsclite                   # Daemon to communicate with smartcards
+          - wireguard-tools            # VPN
+          - yubikey-manager            # Manage YubiKeys
+          - yubikey-personalization    # Configure YubiKey parameters
 
           #=== Cloud / CLI Tools ===
           - aws-cli-v2                 # AWS command-line interface
-          - ripgrep                    # Faster grep alternative
           - fzf                        # Fuzzy finder for the command line
-          - rustup                     # Rust toolchain installer
           - gdb
+          - ripgrep                    # Faster grep alternative
+          - rustup                     # Rust toolchain installer
 
           #=== File Management / GPU libs ===
-          - dolphin                    # KDE file manager
-          - libva                      # VA-API for video acceleration
           - brightnessctl              # Control screen brightness via CLI
+          - dolphin                    # KDE file manager
           - libfido2                   # FIDO/U2F authentication library
+          - libva                      # VA-API for video acceleration
           - zbar                       # Barcode/QR code scanner CLI tools
 
           #=== Containers ===
@@ -486,7 +489,7 @@
             aur_directories: "{{ aur_directories.files }}"
 
         - name: build aur packages
-          command: makepkg -si --noconfirm
+          command: makepkg -sirc --noconfirm
           args:
             chdir: "{{ item.path }}"
           with_items: "{{ aur_directories }}"

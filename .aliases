@@ -104,7 +104,7 @@ elif command -v vi &>/dev/null; then
 fi
 
 ### vpn
-alias vpn='sudo openconnect corp-vpn.sonos.com -u sean.simonsen --useragent=AnyConnect'
+alias vpn-sonos='sudo openconnect corp-vpn.sonos.com -u sean.simonsen --useragent=AnyConnect'
 
 ### zsh reload
 alias zshrc='omz reload'
