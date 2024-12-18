@@ -519,7 +519,8 @@
               - yay
               - zoom
             state: present
-            executable: yay
+            executable: /usr/bin/yay
+            extra_args: --builddir /var/cache/yay
 
         - name: reset android studio sdk directory
           file:
