@@ -191,6 +191,8 @@
             name:
               - cuda                       # NVIDIA GPU compute toolkit
               - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
+              - nvidia-utils
+              - nvidia-container-toolkit
             state: present
           when: has_nvidia
 
@@ -354,6 +356,16 @@
             content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
             dest: /etc/udev/rules.d/99-nvidia.rules
 
+        - name: configure nvidia for docker
+          command: nvidia-ctk runtime configure --runtime=docker
+          when: has_nvidia
+
+        - name: restart docker
+          systemd:
+            name: docker
+            state: restarted
+          when: has_nvidia
+
         - name: ignore lid closing (handled by hyprland)
           lineinfile:
             path: /etc/systemd/logind.conf
@@ -390,6 +402,26 @@
       set_fact:
         user: "{{ ansible_env.USER }}"
       when: user|length == 0
+
+    # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+    - name: nvidia config
+      block:
+
+        - name: configure container runtime
+          command: "nvidia-ctk runtime configure --runtime=docker --config=/home/{{ user }}/.config/docker/daemon.json"
+          become: true
+          become_user: "{{ user }}"
+          when: has_nvidia
+
+        - name: configure container runtime
+          command: systemctl --user restart docker
+          become: true
+          become_user: "{{ user }}"
+          when: has_nvidia
+
+        - name: run nvidia-ctk
+          command: nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
+          when: has_nvidia
 
     - name: user specific
       block:
