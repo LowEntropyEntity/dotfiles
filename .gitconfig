@@ -5,6 +5,11 @@
 	# execute shell script in repository's root directory
 	exec = "!exec "
 
+	diffh = !"git -c delta.side-by-side=true diff"
+	showh = !"git -c delta.side-by-side=true show"
+	diffv = !"git -c delta.side-by-side=false diff"
+	showv = !"git -c delta.side-by-side=false show"
+
 	# --force-with-lease is safer than --force in the case where someone's pushed after your last fetch
 	force-push = push --force-with-lease
 
@@ -33,6 +38,7 @@
 
 	# shows all tracked files in a tree-like format
 	tree = ls-tree -r --name-only HEAD
+	unstage = reset HEAD --
 
 [commit]
 	gpgSign = true
@@ -43,8 +49,9 @@
 	pager = delta
 
 [delta]
-	features = catppuccin-mocha
+	features = arctic-fox
 	navigate = true # use n and N to move between diff sections
+	side-by-side = true
 
 [format]
 	pretty = %C(auto)%h %H %d%C(reset)%n%C(dim white)%an <%ae>%C(reset) %C(cyan)%G? %GS%C(reset)%n%C(dim white)%ad%C(reset)%n%n    %s%C(reset)%n
@@ -54,7 +61,7 @@
 	lineNumber = true
 
 [include]
-	path = ~/.config/delta/themes/catppuccin.gitconfig
+	path = ~/.config/delta/themes/themes.gitconfig
 
 [init]
 	defaultBranch = main
@@ -67,6 +74,12 @@
 
 [merge]
 	conflictstyle = zdiff3
+
+[pager]
+	blame = delta
+	diff = delta
+	reflog = delta
+	show = delta
 
 [pull]
 	rebase = true

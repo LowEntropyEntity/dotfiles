@@ -1,0 +1,5 @@
+# git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME config --local include.path ../.dot-gitconfig
+
+[alias]
+	grep-all = "!sh -c 'echo \"error: this would search entire home directory\" >&2; exit 1'"
+

@@ -5,17 +5,6 @@ alias ..='pushd ..'
 alias ...='pushd ../..'
 alias ....='pushd ../../..'
 
-### searching and listing
-if command -v grep &>/dev/null; then
-	alias grep='rg --color=auto'
-fi
-
-if command -v fd &>/dev/null; then
-	alias find='fd --hidden --follow'
-fi
-
-alias findfile='find . | grep' # find file by name
-
 ### file listing and viewing
 if command -v bat &>/dev/null; then
 	alias cat='bat --style=plain'
@@ -31,6 +20,7 @@ else
 	alias ll='ls -lFG'
 	alias lla='ls -lAFG'
 fi
+alias findfile='find . | grep' # find file by name
 
 ### dotfiles and git
 alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'

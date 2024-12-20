@@ -102,7 +102,6 @@
 
               #=== Cloud / CLI Tools ===
               - aws-cli-v2                 # AWS command-line interface
-              - ripgrep                    # Faster grep alternative
               - fzf                        # Fuzzy finder for the command line
               - rustup                     # Rust toolchain installer
               - gdb
@@ -150,7 +149,6 @@
 
               #=== Linux command replacements ===
               - bat                        # cat
-              - fd                         # find
               - eza                        # ls
 
               #=== Wayland Compositor & Related Tools ===
