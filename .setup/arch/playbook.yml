@@ -115,6 +115,7 @@
 
               #=== Containers ===
               - docker
+              - docker-buildx
               - docker-compose
 
               #=== Wayland / Display Utilities ===
