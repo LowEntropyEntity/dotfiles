@@ -44,8 +44,7 @@ alias aws-login='aws sso login --profile'
 alias ai='chatgpt'
 
 ### browsers
-alias chrome='chromium --guest --enable-chrome-browser-cloud-management &'
-alias chromium-docker="docker exec -it ungoogled-chromium /opt/ungoogledchromium/chrome --ozone-platform=wayland --no-sandbox --new-window"
+alias chrome="docker exec -it ungoogled-chromium /opt/ungoogledchromium/chrome --ozone-platform=wayland --no-sandbox --new-window"
 
 ### shell history/stealth
 alias stealth='set +o history'
