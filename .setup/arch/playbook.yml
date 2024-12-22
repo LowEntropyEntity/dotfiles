@@ -23,7 +23,17 @@
 
   tasks:
 
+    - name: detect nvidia gpu
+      shell: "lspci | grep -i nvidia"
+      register: nvidia_check
+      failed_when: false
+      changed_when: false
+
+    - set_fact:
+        has_nvidia: "{{ nvidia_check.stdout != '' }}"
+
     - name: root specific
+      when: ansible_user_id == 'root'
       block:
 
         - name: fail if running as root but no user specified
@@ -38,14 +48,10 @@
               - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
             fail_msg: "password must match and not be empty if user is specified"
 
-        - name: detect nvidia gpu
-          shell: "lspci | grep -i nvidia"
-          register: nvidia_check
-          failed_when: false
-          changed_when: false
-
-        - set_fact:
-            has_nvidia: "{{ nvidia_check.stdout != '' }}"
+        - name: pacman update
+          pacman:
+            update_cache: true
+            upgrade: true
 
         - name: set hostname
           hostname:
@@ -57,11 +63,6 @@
         - debug:
             msg: skipped hostname because we're running in docker
           when: ansible_virtualization_type == "docker"
-
-        - name: pacman update
-          pacman:
-            update_cache: true
-            upgrade: true
 
         - name: install base apps
           pacman:
@@ -233,6 +234,7 @@
               dns=none
 
         - name: enable services
+          when: ansible_virtualization_type != "docker"
           block:
 
             - name: restart NetworkManager
@@ -294,8 +296,6 @@
                 enabled: true
                 state: started
 
-          when: ansible_virtualization_type != "docker"
-
         - debug:
             msg: skipped systemd calls because we're running in docker
           when: ansible_virtualization_type == "docker"
@@ -328,6 +328,7 @@
             root_device: '{{ root_device.stdout }}'
         
         - name: steps that need a physical host
+          when: ansible_virtualization_type != "docker"
           block:
 
             - name: update /etc/resolv.conf to use dnscrypt-proxy
@@ -376,13 +377,12 @@
             - name: create ramdisk
               command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
 
-          when: ansible_virtualization_type != "docker"
-
         - debug:
             msg: skipped boot loader, dns steps because we're running in docker
           when: ansible_virtualization_type == "docker"
 
         - name: nvidia config
+          when: has_nvidia
           block:
 
             - name: configure modprobe
@@ -405,8 +405,6 @@
                 name: docker
                 state: restarted
               when: ansible_virtualization_type != "docker"
-
-          when: has_nvidia
 
         - name: ignore lid closing (handled by hyprland)
           lineinfile:
@@ -438,34 +436,31 @@
             shell: /usr/bin/zsh
           when: user|length > 0 and user_id.rc != 0
 
-      when: ansible_user_id == 'root'
-
-    - name: set user to current user if no user given
+    - name: set user variable to current user if no user given
       set_fact:
-        user: "{{ ansible_env.USER }}"
-      when: user|length == 0
+        user: "{{ ansible_user_id }}"
+      when: user|length == 0 and ansible_user_id != 'root'
 
     # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
     - name: nvidia config
+      when: has_nvidia
       block:
 
         - name: configure container runtime
           command: "nvidia-ctk runtime configure --runtime=docker --config=/home/{{ user }}/.config/docker/daemon.json"
           become: true
           become_user: "{{ user }}"
-          when: has_nvidia
 
         - name: restart docker after configuring container runtime
           command: systemctl --user restart docker
           become: true
           become_user: "{{ user }}"
-          when: has_nvidia
 
         - name: run nvidia-ctk
           command: nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
-          when: has_nvidia
 
     - name: user specific
+      when: user|length == 0
       block:
 
         - name: create xdg dirs
@@ -610,65 +605,65 @@
           with_items: "{{ yay_install_results.results }}"
           when: item.rc != 0
 
-        - name: reset android studio sdk directory
-          file:
-            path: "/home/{{ user }}/android-sdk"
-            state: absent
+        # - name: reset android studio sdk directory
+        #   file:
+        #     path: "/home/{{ user }}/android-sdk"
+        #     state: absent
 
-        - name: create android studio dirs
-          file:
-            path: "{{ item }}"
-            state: directory
-          loop:
-            - "/home/{{ user }}/android-sdk/platforms"
-            - "/home/{{ user }}/android-sdk/emulator"
-            - "/home/{{ user }}/android-sdk/cmdline-tools/latest"
-            - "/home/{{ user }}/android-sdk/build-tools/35.0.0"
-            - "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
-            - "/home/{{ user }}/android-sdk/sources/android-34"
+        # - name: create android studio dirs
+        #   file:
+        #     path: "{{ item }}"
+        #     state: directory
+        #   loop:
+        #     - "/home/{{ user }}/android-sdk/platforms"
+        #     - "/home/{{ user }}/android-sdk/emulator"
+        #     - "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+        #     - "/home/{{ user }}/android-sdk/build-tools/35.0.0"
+        #     - "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
+        #     - "/home/{{ user }}/android-sdk/sources/android-34"
 
-        - name: install android cmdline-tools
-          unarchive:
-            src: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
-            dest: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/cmdline-tools/latest/bin"
+        # - name: install android cmdline-tools
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+        #     dest: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/cmdline-tools/latest/bin"
 
-        # Android sources
-        - name: install android sources
-          unarchive:
-            src: "https://dl.google.com/android/repository/sources-34_r01.zip"
-            dest: "/home/{{ user }}/android-sdk/sources/android-34"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/sources/android-34/AndroidManifest.xml"
+        # # Android sources
+        # - name: install android sources
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/sources-34_r01.zip"
+        #     dest: "/home/{{ user }}/android-sdk/sources/android-34"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/sources/android-34/AndroidManifest.xml"
 
-        - name: install android build-tools
-          unarchive:
-            src: "https://dl.google.com/android/repository/build-tools_r36-rc1_linux.zip"
-            dest: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1/bin"
+        # - name: install android build-tools
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/build-tools_r36-rc1_linux.zip"
+        #     dest: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1/bin"
 
-        - name: install android platform-tools
-          unarchive:
-            src: "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
-            dest: "/home/{{ user }}/android-sdk"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/platform-tools/adb"
+        # - name: install android platform-tools
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+        #     dest: "/home/{{ user }}/android-sdk"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/platform-tools/adb"
 
-        - name: install android platform 34-ext7
-          unarchive:
-            src: "https://dl.google.com/android/repository/platform-34-ext7_r02.zip"
-            dest: "/home/{{ user }}/android-sdk/platforms"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/platforms/android-34-ext7/package.xml"
+        # - name: install android platform 34-ext7
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/platform-34-ext7_r02.zip"
+        #     dest: "/home/{{ user }}/android-sdk/platforms"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/platforms/android-34-ext7/package.xml"
 
-        - name: install android emulator
-          unarchive:
-            src: "https://dl.google.com/android/repository/emulator-linux_x64-12414864.zip"
-            dest: "/home/{{ user }}/android-sdk/emulator"
-            remote_src: yes
-            creates: "/home/{{ user }}/android-sdk/emulator/emulator"
+        # - name: install android emulator
+        #   unarchive:
+        #     src: "https://dl.google.com/android/repository/emulator-linux_x64-12414864.zip"
+        #     dest: "/home/{{ user }}/android-sdk/emulator"
+        #     remote_src: yes
+        #     creates: "/home/{{ user }}/android-sdk/emulator/emulator"
 
         # - name: point flutter to android-sdk
         #   command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
@@ -692,3 +687,4 @@
       user:
         name: root
         password: "!"
+      when: ansible_user_id == 'root'

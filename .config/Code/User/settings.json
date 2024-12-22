@@ -13,7 +13,6 @@
 	"CodeGPT.Autocomplete.enabled": true,
 	"CodeGPT.Autocomplete.maxTokens": 500000,
 	"github.copilot.advanced": {},
-	"cloudcode.duetAI.project": "sonos-content-providers",
 	"window.customTitleBarVisibility": "auto",
 	"github.copilot.editor.enableAutoCompletions": true,
 	"[json]": {
