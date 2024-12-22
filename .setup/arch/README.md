@@ -47,15 +47,20 @@ This should install a base Arch system, apply the configuration, and set up the 
 
 1. **Log in as root**
 
-2. **Run `make`**
-   - `make` will run `ansible-playbook playbook.yml`.
+2. **Download the ansible playbook**
+   ```bash
+   curl https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/Makefile > Makefile
+   ```
+
+3. **Run `make`**
+   - `make` will run download and run the playbook.
    - The playbook will:
      - Attempt to detect whether you have an NVIDIA GPU and install the appropriate drivers and configuration.
      - Install all packages, configure DNS, SSH, etc.
 
    Enter new username and password when asked. The Ansible play will set up your entire environment
 
-3. **Post-Install Checks**
+4. **Post-Install Checks**
    - Once Ansible finishes, log out and log back in as your newly created user.
    - Confirm that your environment and tools are working as expected.
 
