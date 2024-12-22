@@ -29,7 +29,7 @@
         - name: fail if running as root but no user specified
           assert:
             that:
-              - not (ansible_user_id == '0' and user|length == 0)
+              - not (ansible_user_id == 'root' and user|length == 0)
             fail_msg: "must specify a user when running as root"
 
         - name: validate password
@@ -38,10 +38,10 @@
               - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
             fail_msg: "password must match and not be empty if user is specified"
 
-        # Attempt to detect NVIDIA GPU (optional). If detection fails or is not desired, you can prompt.
-        - name: detect nvidia GPU
+        - name: detect nvidia gpu
           shell: "lspci | grep -i nvidia"
           register: nvidia_check
+          failed_when: false
           changed_when: false
 
         - set_fact:
@@ -50,7 +50,13 @@
         - name: set hostname
           hostname:
             name: "{{ hostname }}"
-          when: hostname|length > 0 and hostname != ansible_hostname
+          when:
+            - hostname|length > 0 and hostname != ansible_hostname
+            - ansible_virtualization_type != "docker"
+
+        - debug:
+            msg: skipped hostname because we're running in docker
+          when: ansible_virtualization_type == "docker"
 
         - name: pacman update
           pacman:
@@ -64,6 +70,7 @@
               - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
               - linux-lts-headers          # Kernel headers for LTS kernel
               - man-db                     # Man pages database
+              - networkmanager
               - openssh                    # SSH client/server
               - less
               - tmux
@@ -101,7 +108,6 @@
               - pass-otp                   # OTP extension for pass
 
               #=== Cloud / CLI Tools ===
-              - aws-cli-v2                 # AWS command-line interface
               - fzf                        # Fuzzy finder for the command line
               - rustup                     # Rust toolchain installer
               - gdb
@@ -209,17 +215,12 @@
             group: root
             mode: '0644'
 
-        - name: enable dnscrypt-proxy
-          systemd_service:
-            name: dnscrypt-proxy.service
-            enabled: true
-            state: started
-
-        - name: update /etc/resolv.conf to use dnscrypt-proxy
-          lineinfile:
-            path: /etc/resolv.conf
-            regexp: '^nameserver '
-            line: 'nameserver 127.0.0.1'
+        - name: configure ssh
+          copy:
+            content: |
+              PasswordAuthentication no
+              AuthenticationMethods publickey
+            dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
 
         - name: disable NetworkManager DNS overwrites
           copy:
@@ -231,72 +232,91 @@
               [main]
               dns=none
 
-        - name: restart NetworkManager
-          systemd:
-            name: NetworkManager
-            state: restarted
+        - name: enable services
+          block:
 
-        - name: configure ssh
-          get_url:
-            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/20-force_publickey_auth.conf
-            dest: /etc/ssh/sshd_config.d/20-force_publickey_auth.conf
+            - name: restart NetworkManager
+              systemd:
+                name: NetworkManager
+                state: restarted
 
-        - name: enable sshd
-          systemd_service:
-            name: sshd
-            enabled: true
-            state: started
+            - name: enable sshd
+              systemd_service:
+                name: sshd
+                enabled: true
+                state: started
 
-        - name: enable timesync
-          systemd_service:
-            name: systemd-timesyncd
-            enabled: true
-            state: started
+            - name: enable timesync
+              systemd_service:
+                name: systemd-timesyncd
+                enabled: true
+                state: started
 
-        - name: enable docker
-          systemd_service:
-            name: docker
-            enabled: true
-            state: started
+            - name: enable docker
+              systemd_service:
+                name: docker
+                enabled: true
+                state: started
 
-        - name: enable bluetooth
-          systemd_service:
-            name: bluetooth
-            enabled: true
-            state: started
+            - name: enable bluetooth
+              systemd_service:
+                name: bluetooth
+                enabled: true
+                state: started
 
-        - name: enable nvidia-hibernate
-          systemd_service:
-            name: nvidia-hibernate
-            enabled: true
-          when: has_nvidia
+            - name: enable nvidia-hibernate
+              systemd_service:
+                name: nvidia-hibernate
+                enabled: true
+              when: has_nvidia
 
-        - name: enable nvidia-resume
-          systemd_service:
-            name: nvidia-resume
-            enabled: true
-          when: has_nvidia
+            - name: enable nvidia-resume
+              systemd_service:
+                name: nvidia-resume
+                enabled: true
+              when: has_nvidia
 
-        - name: enable nvidia-suspend
-          systemd_service:
-            name: nvidia-suspend
-            enabled: true
-          when: has_nvidia
+            - name: enable nvidia-suspend
+              systemd_service:
+                name: nvidia-suspend
+                enabled: true
+              when: has_nvidia
 
-        - name: enable printing
-          systemd_service:
-            name: cups
-            enabled: true
-            state: started
+            - name: enable printing
+              systemd_service:
+                name: cups
+                enabled: true
+                state: started
+
+            - name: enable dnscrypt-proxy
+              systemd_service:
+                name: dnscrypt-proxy.service
+                enabled: true
+                state: started
+
+          when: ansible_virtualization_type != "docker"
+
+        - debug:
+            msg: skipped systemd calls because we're running in docker
+          when: ansible_virtualization_type == "docker"
 
         - name: delete waybar config (will come from dotfiles later)
           file:
             path: /etc/xdg/waybar
             state: absent
 
+        - name: ensure /boot/loader directory exists
+          file:
+            path: "/boot/loader/entries"
+            state: directory
+
         - name: create boot loader config
-          get_url:
-            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/loader.conf
+          copy:
+            content: |
+              default arch.conf
+              timeout 5
+              console-mode max
+              editor no
             dest: /boot/loader/loader.conf
 
         - name: get root partition device
@@ -306,63 +326,86 @@
 
         - set_fact:
             root_device: '{{ root_device.stdout }}'
+        
+        - name: steps that need a physical host
+          block:
 
-        - name: set part_uuid variable
-          shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
-          register: part_uuid
-          changed_when: false
+            - name: update /etc/resolv.conf to use dnscrypt-proxy
+              lineinfile:
+                path: /etc/resolv.conf
+                regexp: '^nameserver '
+                line: 'nameserver 127.0.0.1'
 
-        - set_fact:
-            part_uuid: '{{ part_uuid.stdout }}'
+            - name: set part_uuid variable
+              shell: "blkid | grep {{ root_device }} | grep -oP 'PARTUUID=\"\\K[^\"]+'"
+              register: part_uuid
+              changed_when: false
 
-        - name: fetch boot loader entry template
-          get_url:
-            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch.conf
-            dest: ./arch.conf
+            - set_fact:
+                part_uuid: '{{ part_uuid.stdout }}'
 
-        - name: fetch boot loader fallback entry template
-          get_url:
-            url: https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/systemd-boot/arch-fallback.conf
-            dest: ./arch-fallback.conf
+            - name: create boot loader entry
+              copy:
+                content: |
+                  title   Arch Linux
+                  linux   /vmlinuz-linux
+                  initrd  /intel-ucode.img
+                  initrd  /initramfs-linux.img
+                  options options root=PARTUUID={{ part_uuid }} zswap.enabled=0 rw rootfstype=ext4{{ ' nvidia-drm.modeset=1' if has_nvidia else '' }}
+                dest: /boot/loader/entries/arch.conf
 
-        - name: create boot loader entry
-          template:
-            src: arch.conf
-            dest: /boot/loader/entries/arch.conf
+            - name: create boot loader fallback entry
+              copy:
+                content: |
+                  title   Arch Linux
+                  linux   /vmlinuz-linux
+                  initrd  /intel-ucode.img
+                  initrd  /initramfs-linux-fallback.img
+                  options options root=PARTUUID={{ part_uuid }} zswap.enabled=0 rw rootfstype=ext4{{ ' nvidia-drm.modeset=1' if has_nvidia else '' }}
+                dest: /boot/loader/entries/arch-fallback.conf
 
-        - name: create boot loader fallback entry
-          template:
-            src: arch-fallback.conf
-            dest: /boot/loader/entries/arch-fallback.conf
+            - name: configure ramdisk
+              copy:
+                content: |
+                  MODULES=({{ 'nvidia nvidia_modeset nvidia_uvm nvidia_drm' if has_nvidia else '' }})
+                  BINARIES=()
+                  FILES=()
+                  HOOKS=(base udev autodetect keyboard keymap modconf block filesystems fsck)
+                dest: /etc/mkinitcpio.conf
 
-        - name: configure ramdisk
-          get_url:
-            url: "https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/main/.setup/arch/mkinitcpio{{ '-nvidia' if has_nvidia else '' }}.conf"
-            dest: /etc/mkinitcpio.conf
+            - name: create ramdisk
+              command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
 
-        - name: create ramdisk
-          command: mkinitcpio --config /etc/mkinitcpio.conf --generate /boot/initramfs-linux.img
+          when: ansible_virtualization_type != "docker"
 
-        - name: configure modprobe
-          copy:
-            content: |
-              options nvidia-drm modeset=1
-              options nvidia NVreg_PreserveVideoMemoryAllocations=1
-            dest: /etc/modprobe.d/nvidia.conf
+        - debug:
+            msg: skipped boot loader, dns steps because we're running in docker
+          when: ansible_virtualization_type == "docker"
 
-        - name: configure nvidia udev rule
-          copy:
-            content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
-            dest: /etc/udev/rules.d/99-nvidia.rules
+        - name: nvidia config
+          block:
 
-        - name: configure nvidia for docker
-          command: nvidia-ctk runtime configure --runtime=docker
-          when: has_nvidia
+            - name: configure modprobe
+              copy:
+                content: |
+                  options nvidia-drm modeset=1
+                  options nvidia NVreg_PreserveVideoMemoryAllocations=1
+                dest: /etc/modprobe.d/nvidia.conf
 
-        - name: restart docker
-          systemd:
-            name: docker
-            state: restarted
+            - name: configure nvidia udev rule
+              copy:
+                content: 'ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"'
+                dest: /etc/udev/rules.d/99-nvidia.rules
+
+            - name: configure nvidia for docker
+              command: nvidia-ctk runtime configure --runtime=docker
+
+            - name: restart docker
+              systemd:
+                name: docker
+                state: restarted
+              when: ansible_virtualization_type != "docker"
+
           when: has_nvidia
 
         - name: ignore lid closing (handled by hyprland)
@@ -395,7 +438,7 @@
             shell: /usr/bin/zsh
           when: user|length > 0 and user_id.rc != 0
 
-      when: ansible_user_id == '0'
+      when: ansible_user_id == 'root'
 
     - name: set user to current user if no user given
       set_fact:
@@ -412,7 +455,7 @@
           become_user: "{{ user }}"
           when: has_nvidia
 
-        - name: configure container runtime
+        - name: restart docker after configuring container runtime
           command: systemctl --user restart docker
           become: true
           become_user: "{{ user }}"
@@ -546,7 +589,6 @@
             - grimblast-git
 
             # privacy / security
-            - i2p
             - keybase-bin
             - proton-vpn-gtk-app
 
@@ -650,4 +692,3 @@
       user:
         name: root
         password: "!"
-      when: ansible_user_id == '0'
