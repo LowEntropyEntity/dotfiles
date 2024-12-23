@@ -67,162 +67,162 @@
         - name: pacman install core packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - archiso                    # create an arch linux ISO
-              - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
-              - linux-lts-headers          # Kernel headers for LTS kernel
-              - man-db                     # Man pages database
-              - networkmanager
-              - openssh                    # SSH client/server
-              - less
-              - tmux
-              - unzip
-              - usbutils
-              - wget
-              - xdg-user-dirs
-              - zsh
-              - zsh-completions
+          loop:
+            - archiso                    # create an arch linux ISO
+            - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
+            - linux-lts-headers          # Kernel headers for LTS kernel
+            - man-db                     # Man pages database
+            - networkmanager
+            - openssh                    # SSH client/server
+            - less
+            - tmux
+            - unzip
+            - usbutils
+            - wget
+            - xdg-user-dirs
+            - zsh
+            - zsh-completions
 
         - name: pacman install audio packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - alsa-utils                 # ALSA sound utilities (amixer, etc.)
-              - pavucontrol                # GUI volume control for PipeWire/PulseAudio
-              - pipewire                   # Next-gen audio/video server
-              - wireplumber                # Session manager for PipeWire
-              - phonon-qt5-vlc             # Qt multimedia backend using VLC
+          loop:
+            - alsa-utils                 # ALSA sound utilities (amixer, etc.)
+            - pavucontrol                # GUI volume control for PipeWire/PulseAudio
+            - pipewire                   # Next-gen audio/video server
+            - wireplumber                # Session manager for PipeWire
+            - phonon-qt5-vlc             # Qt multimedia backend using VLC
 
         - name: pacman install bluetooth packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - blueman                    # Bluetooth manager GUI
-              - bluez                      # Official Bluetooth protocol stack
-              - bluez-utils                # Bluetooth command-line utilities
+          loop:
+            - blueman                    # Bluetooth manager GUI
+            - bluez                      # Official Bluetooth protocol stack
+            - bluez-utils                # Bluetooth command-line utilities
 
         - name: pacman install networking packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - bind                       # DNS tools (e.g. `dig`)
-              - dnscrypt-proxy             # DNS encryption (DoH/DoT)
-              - ccid                       # Smart card CCID driver
-              - pcsclite                   # Daemon to communicate with smartcards
-              - hopenpgp-tools             # Additional PGP utilities
-              - yubikey-manager            # Manage YubiKeys
-              - yubikey-personalization    # Configure YubiKey parameters
-              - gnupg
-              - gocryptfs                  # Encrypted FUSE filesystem
-              - jq                         # JSON command-line processor
-              - pass                       # GPG-based password manager
-              - pass-otp                   # OTP extension for pass
+          loop:
+            - bind                       # DNS tools (e.g. `dig`)
+            - dnscrypt-proxy             # DNS encryption (DoH/DoT)
+            - ccid                       # Smart card CCID driver
+            - pcsclite                   # Daemon to communicate with smartcards
+            - hopenpgp-tools             # Additional PGP utilities
+            - yubikey-manager            # Manage YubiKeys
+            - yubikey-personalization    # Configure YubiKey parameters
+            - gnupg
+            - gocryptfs                  # Encrypted FUSE filesystem
+            - jq                         # JSON command-line processor
+            - pass                       # GPG-based password manager
+            - pass-otp                   # OTP extension for pass
 
         - name: pacman install cli packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - fzf                        # Fuzzy finder for the command line
-              - rustup                     # Rust toolchain installer
-              - gdb
+          loop:
+            - fzf                        # Fuzzy finder for the command line
+            - rustup                     # Rust toolchain installer
+            - gdb
 
         - name: pacman install file management, utility packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - dolphin                    # KDE file manager
-              - libva                      # VA-API for video acceleration
-              - brightnessctl              # Control screen brightness via CLI
-              - libfido2                   # FIDO/U2F authentication library
-              - zbar                       # Barcode/QR code scanner CLI tools
+          loop:
+            - dolphin                    # KDE file manager
+            - libva                      # VA-API for video acceleration
+            - brightnessctl              # Control screen brightness via CLI
+            - libfido2                   # FIDO/U2F authentication library
+            - zbar                       # Barcode/QR code scanner CLI tools
 
         - name: pacman install docker packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - docker
-              - docker-buildx
-              - docker-compose
+          loop:
+            - docker
+            - docker-buildx
+            - docker-compose
 
         - name: pacman install display packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - mako                       # Wayland notification daemon
-              - usbip                      # USB over IP utility
-              - wl-clipboard               # Wayland clipboard utilities
+          loop:
+            - mako                       # Wayland notification daemon
+            - usbip                      # USB over IP utility
+            - wl-clipboard               # Wayland clipboard utilities
 
         - name: pacman install development packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - clang
-              - cmake
-              - dart
-              - git
-              - git-lfs
-              - go
-              - gradle
-              - jdk-openjdk
-              - mitmproxy
-              - nodejs
-              - npm
+          loop:
+            - clang
+            - cmake
+            - dart
+            - git
+            - git-lfs
+            - go
+            - gradle
+            - jdk-openjdk
+            - mitmproxy
+            - nodejs
+            - npm
 
         - name: pacman install visual packages
           pacman:
             name: "{{ item }}"
-            loop:
-              #=== Terminal / Browsers / Editors ===
-              - alacritty
-              - chromium
-              - neovim
-              - blender
+          loop:
+            #=== Terminal / Browsers / Editors ===
+            - alacritty
+            - chromium
+            - neovim
+            - blender
 
-              #=== Linux command replacements ===
-              - bat                        # cat
-              - eza                        # ls
+            #=== Linux command replacements ===
+            - bat                        # cat
+            - eza                        # ls
 
-              #=== Wayland Compositor & Related Tools ===
-              - hyprland
-              - hyprpicker                 # Color picker for Wayland
-              - grim                       # Screenshot tool for Wayland
-              - slurp                      # Select regions in Wayland (e.g. screenshot)
-              - swayidle                   # Idle management for Wayland
-              - waybar                     # Customizable Wayland status bar
-              - waylock                    # Screen locker for Wayland
-              - wf-recorder                # Screen recorder for Wayland
-              - wofi                       # Wayland application launcher
-              - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
+            #=== Wayland Compositor & Related Tools ===
+            - hyprland
+            - hyprpicker                 # Color picker for Wayland
+            - grim                       # Screenshot tool for Wayland
+            - slurp                      # Select regions in Wayland (e.g. screenshot)
+            - swayidle                   # Idle management for Wayland
+            - waybar                     # Customizable Wayland status bar
+            - waylock                    # Screen locker for Wayland
+            - wf-recorder                # Screen recorder for Wayland
+            - wofi                       # Wayland application launcher
+            - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
 
-              #=== Fonts / Theming / Qt Integration ===
-              - font-manager
-              - noto-fonts-emoji
-              - ttf-hack-nerd
-              - ttf-jetbrains-mono-nerd
-              - qt5ct                      # Qt5 configuration tool
-              - qt5-wayland                # Wayland support for Qt5 apps
-              - qt6-wayland                # Wayland support for Qt6 apps
+            #=== Fonts / Theming / Qt Integration ===
+            - font-manager
+            - noto-fonts-emoji
+            - ttf-hack-nerd
+            - ttf-jetbrains-mono-nerd
+            - qt5ct                      # Qt5 configuration tool
+            - qt5-wayland                # Wayland support for Qt5 apps
+            - qt6-wayland                # Wayland support for Qt6 apps
 
-              #=== GPU / Multimedia Tools ===
-              - obs-studio                 # Video recording/streaming
-              - speedcrunch                # calculator
-              - spotify-launcher
-              - udiskie                    # Automount tool for removable media
-              - vlc
-              - polkit-kde-agent           # Polkit auth agent for KDE
-              - v4l2loopback-dkms          # Virtual V4L2 camera device module
+            #=== GPU / Multimedia Tools ===
+            - obs-studio                 # Video recording/streaming
+            - speedcrunch                # calculator
+            - spotify-launcher
+            - udiskie                    # Automount tool for removable media
+            - vlc
+            - polkit-kde-agent           # Polkit auth agent for KDE
+            - v4l2loopback-dkms          # Virtual V4L2 camera device module
 
-              #=== development tools ===
-              - git-delta
+            #=== development tools ===
+            - git-delta
 
         - name: pacman install nvidia packages
           pacman:
             name: "{{ item }}"
-            loop:
-              - cuda                       # NVIDIA GPU compute toolkit
-              - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
-              - nvidia-utils
-              - nvidia-container-toolkit
+          loop:
+            - cuda                       # NVIDIA GPU compute toolkit
+            - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
+            - nvidia-utils
+            - nvidia-container-toolkit
             state: present
           when: has_nvidia
 
