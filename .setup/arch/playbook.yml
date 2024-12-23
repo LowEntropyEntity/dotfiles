@@ -64,10 +64,10 @@
             msg: skipped hostname because we're running in docker
           when: ansible_virtualization_type == "docker"
 
-        - name: install base apps
+        - name: pacman install core packages
           pacman:
-            name:
-              #=== System / Shells / Core Tools ===
+            name: "{{ item }}"
+            loop:
               - archiso                    # create an arch linux ISO
               - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
               - linux-lts-headers          # Kernel headers for LTS kernel
@@ -83,19 +83,28 @@
               - zsh
               - zsh-completions
 
-              #=== Audio / Media ===
+        - name: pacman install audio packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - alsa-utils                 # ALSA sound utilities (amixer, etc.)
               - pavucontrol                # GUI volume control for PipeWire/PulseAudio
               - pipewire                   # Next-gen audio/video server
               - wireplumber                # Session manager for PipeWire
               - phonon-qt5-vlc             # Qt multimedia backend using VLC
 
-              #=== Bluetooth ===
+        - name: pacman install bluetooth packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - blueman                    # Bluetooth manager GUI
               - bluez                      # Official Bluetooth protocol stack
               - bluez-utils                # Bluetooth command-line utilities
 
-              #=== Networking / DNS / Security ===
+        - name: pacman install networking packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - bind                       # DNS tools (e.g. `dig`)
               - dnscrypt-proxy             # DNS encryption (DoH/DoT)
               - ccid                       # Smart card CCID driver
@@ -109,47 +118,60 @@
               - pass                       # GPG-based password manager
               - pass-otp                   # OTP extension for pass
 
-              #=== Cloud / CLI Tools ===
+        - name: pacman install cli packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - fzf                        # Fuzzy finder for the command line
               - rustup                     # Rust toolchain installer
               - gdb
 
-              #=== File Management / GPU libs ===
+        - name: pacman install file management, utility packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - dolphin                    # KDE file manager
               - libva                      # VA-API for video acceleration
               - brightnessctl              # Control screen brightness via CLI
               - libfido2                   # FIDO/U2F authentication library
               - zbar                       # Barcode/QR code scanner CLI tools
 
-              #=== Containers ===
+        - name: pacman install docker packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - docker
               - docker-buildx
               - docker-compose
 
-              #=== Wayland / Display Utilities ===
+        - name: pacman install display packages
+          pacman:
+            name: "{{ item }}"
+            loop:
               - mako                       # Wayland notification daemon
               - usbip                      # USB over IP utility
               - wl-clipboard               # Wayland clipboard utilities
 
-              #=== Additional Common Tools ===
-              - git
-              - git-lfs
-
-        - name: install development apps
+        - name: pacman install development packages
           pacman:
-            name:
+            name: "{{ item }}"
+            loop:
               - clang
               - cmake
               - dart
+              - git
+              - git-lfs
               - go
               - gradle
+              - jdk-openjdk
               - mitmproxy
               - nodejs
               - npm
 
-        - name: install visual apps
+        - name: pacman install visual packages
           pacman:
-            name:
+            name: "{{ item }}"
+            loop:
               #=== Terminal / Browsers / Editors ===
               - alacritty
               - chromium
@@ -193,9 +215,10 @@
               #=== development tools ===
               - git-delta
 
-        - name: install nvidia-related packages
+        - name: pacman install nvidia packages
           pacman:
-            name:
+            name: "{{ item }}"
+            loop:
               - cuda                       # NVIDIA GPU compute toolkit
               - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
               - nvidia-utils
@@ -243,59 +266,29 @@
                 name: NetworkManager
                 state: restarted
 
-            - name: enable sshd
+
+            - name: enable services
               systemd_service:
-                name: sshd
+                name: "{{ item }}"
                 enabled: true
                 state: started
+              loop:
+                - sshd
+                - systemd-timesyncd
+                - docker
+                - bluetooth
+                - cups
+                - dnscrypt-proxy.service
 
-            - name: enable timesync
+            - name: enable nvidia services
               systemd_service:
-                name: systemd-timesyncd
+                name: "{{ item }}"
                 enabled: true
-                state: started
-
-            - name: enable docker
-              systemd_service:
-                name: docker
-                enabled: true
-                state: started
-
-            - name: enable bluetooth
-              systemd_service:
-                name: bluetooth
-                enabled: true
-                state: started
-
-            - name: enable nvidia-hibernate
-              systemd_service:
-                name: nvidia-hibernate
-                enabled: true
+              loop:
+                - nvidia-hibernate
+                - nvidia-resume
+                - nvidia-suspend
               when: has_nvidia
-
-            - name: enable nvidia-resume
-              systemd_service:
-                name: nvidia-resume
-                enabled: true
-              when: has_nvidia
-
-            - name: enable nvidia-suspend
-              systemd_service:
-                name: nvidia-suspend
-                enabled: true
-              when: has_nvidia
-
-            - name: enable printing
-              systemd_service:
-                name: cups
-                enabled: true
-                state: started
-
-            - name: enable dnscrypt-proxy
-              systemd_service:
-                name: dnscrypt-proxy.service
-                enabled: true
-                state: started
 
         - debug:
             msg: skipped systemd calls because we're running in docker
@@ -570,13 +563,13 @@
           command: makepkg -sirc --noconfirm
           args:
             chdir: "{{ item.path }}"
-          with_items: "{{ aur_directories }}"
+          loop: "{{ aur_directories }}"
           when: aur_directories|length > 0
 
         - name: install aur packages with yay
           command: yay -S --needed --noconfirm {{ item }}
           ignore_errors: true
-          with_items:
+          loop:
             - swaylock-effects
             - swww
 
@@ -608,7 +601,7 @@
         - name: show yay installation failures
           debug:
             msg: "Failed to install {{ item.item }}: {{ item.stderr }}"
-          with_items: "{{ yay_install_results.results }}"
+          loop: "{{ yay_install_results.results }}"
           when: item.rc != 0
 
         - name: check if cmdline-tools destination file exists
