@@ -68,6 +68,7 @@
           pacman:
             name:
               #=== System / Shells / Core Tools ===
+              - archiso                    # create an arch linux ISO
               - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
               - linux-lts-headers          # Kernel headers for LTS kernel
               - man-db                     # Man pages database
