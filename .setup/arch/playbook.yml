@@ -64,7 +64,7 @@
           loop:
             - archiso                    # create an arch linux ISO
             - base-devel                 # Core Arch build environment (makepkg, gcc, etc.)
-            - linux-lts-headers          # Kernel headers for LTS kernel
+            - linux-headers
             - man-db                     # Man pages database
             - networkmanager
             - openssh                    # SSH client/server
