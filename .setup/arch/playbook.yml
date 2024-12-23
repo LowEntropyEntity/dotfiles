@@ -617,12 +617,6 @@
           shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/android-sdk/cmdline-tools/latest"
           when: not cmdlinetools_destination.stat.exists
 
-        - name: add android studio commandline tools to PATH
-          lineinfile:
-            path: "/home/{{ user }}/.zshrc"
-            line: 'export PATH="$HOME/android-sdk/cmdline-tools/latest/bin:$PATH"'
-            state: present
-
         - name: install android tools
           shell: "echo y | /home/{{ user }}/android-sdk/cmdline-tools/latest/bin/sdkmanager '{{ item }}'"
           loop:
