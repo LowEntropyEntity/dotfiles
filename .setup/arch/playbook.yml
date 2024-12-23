@@ -172,17 +172,17 @@
           pacman:
             name: "{{ item }}"
           loop:
-            #=== Terminal / Browsers / Editors ===
+            # === Terminal / Browsers / Editors ===
             - alacritty
             - chromium
             - neovim
             - blender
 
-            #=== Linux command replacements ===
+            # === Linux command replacements ===
             - bat                        # cat
             - eza                        # ls
 
-            #=== Wayland Compositor & Related Tools ===
+            # === Wayland Compositor & Related Tools ===
             - hyprland
             - hyprpicker                 # Color picker for Wayland
             - grim                       # Screenshot tool for Wayland
@@ -194,7 +194,7 @@
             - wofi                       # Wayland application launcher
             - xdg-desktop-portal-wlr     # Desktop portal for Wayland (screensharing, etc.)
 
-            #=== Fonts / Theming / Qt Integration ===
+            # === Fonts / Theming / Qt Integration ===
             - font-manager
             - noto-fonts-emoji
             - ttf-hack-nerd
@@ -203,7 +203,7 @@
             - qt5-wayland                # Wayland support for Qt5 apps
             - qt6-wayland                # Wayland support for Qt6 apps
 
-            #=== GPU / Multimedia Tools ===
+            # === GPU / Multimedia Tools ===
             - obs-studio                 # Video recording/streaming
             - speedcrunch                # calculator
             - spotify-launcher
@@ -212,7 +212,7 @@
             - polkit-kde-agent           # Polkit auth agent for KDE
             - v4l2loopback-dkms          # Virtual V4L2 camera device module
 
-            #=== development tools ===
+            # === development tools ===
             - git-delta
 
         - name: pacman install nvidia packages
@@ -223,7 +223,6 @@
             - nvidia-dkms                # NVIDIA proprietary driver (DKMS)
             - nvidia-utils
             - nvidia-container-toolkit
-            state: present
           when: has_nvidia
 
         - name: install utilities
@@ -320,7 +319,7 @@
 
         - set_fact:
             root_device: '{{ root_device.stdout }}'
-        
+
         - name: steps that need a physical host
           when: ansible_virtualization_type != "docker"
           block:
@@ -465,15 +464,15 @@
             path: "{{ item }}"
             state: directory
           loop:
-            -  "/home/{{ user }}/desktop"
-            -  "/home/{{ user }}/downloads"
-            -  "/home/{{ user }}/media/documents"
-            -  "/home/{{ user }}/media/music"
-            -  "/home/{{ user }}/media/pictures"
-            -  "/home/{{ user }}/media/videos"
-            -  "/home/{{ user }}/public"
-            -  "/home/{{ user }}/screenshots"
-            -  "/home/{{ user }}/templates"
+            - "/home/{{ user }}/desktop"
+            - "/home/{{ user }}/downloads"
+            - "/home/{{ user }}/media/documents"
+            - "/home/{{ user }}/media/music"
+            - "/home/{{ user }}/media/pictures"
+            - "/home/{{ user }}/media/videos"
+            - "/home/{{ user }}/public"
+            - "/home/{{ user }}/screenshots"
+            - "/home/{{ user }}/templates"
 
         - name: create containers dirs
           file:
@@ -632,7 +631,7 @@
             state: present
 
         - name: install android tools
-          shell: "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH echo y | sdkmanager '{{ item }}'"
+          shell: "PATH=/home/{{ user }}/android-sdk/cmdline-tools/latest/bin:$PATH echo y | sdkmanager '{{ item }}'"
           loop:
             - "emulator"
             - "platform-tools"
