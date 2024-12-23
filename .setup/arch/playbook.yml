@@ -4,15 +4,16 @@
   vars_prompt:
 
     - name: user
-      prompt: enter non-root user name (leave blank to skip)
+      prompt: non-root user name (leave blank to skip)
       private: false
       default: ""
 
     - name: user_password
-      prompt: enter user password (leave blank if skipped above)
+      prompt: user password (leave blank if skipped above)
       unsafe: true
       private: true
       confirm: true
+      encrypt: "sha512_crypt"
       default: ""
 
     - name: hostname
@@ -414,7 +415,7 @@
               - input
               - wheel
             name: "{{ user }}"
-            password: "{{ user_password | password_hash('sha512') }}"
+            password: "{{ user_password }}"
             shell: /usr/bin/zsh
           when: user|length > 0 and user_id.rc != 0
 
