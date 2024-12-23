@@ -338,25 +338,18 @@
             - set_fact:
                 part_uuid: '{{ part_uuid.stdout }}'
 
-            - name: create boot loader entry
+            - name: create boot loader entries
               copy:
                 content: |
                   title   Arch Linux
                   linux   /vmlinuz-linux
                   initrd  /intel-ucode.img
-                  initrd  /initramfs-linux.img
+                  initrd  {{ item.imageName }}
                   options options root=PARTUUID={{ part_uuid }} zswap.enabled=0 rw rootfstype=ext4{{ ' nvidia-drm.modeset=1' if has_nvidia else '' }}
-                dest: /boot/loader/entries/arch.conf
-
-            - name: create boot loader fallback entry
-              copy:
-                content: |
-                  title   Arch Linux
-                  linux   /vmlinuz-linux
-                  initrd  /intel-ucode.img
-                  initrd  /initramfs-linux-fallback.img
-                  options options root=PARTUUID={{ part_uuid }} zswap.enabled=0 rw rootfstype=ext4{{ ' nvidia-drm.modeset=1' if has_nvidia else '' }}
-                dest: /boot/loader/entries/arch-fallback.conf
+                dest: /boot/loader/entries/{{ item.fileName }}
+              loop:
+                - { imageName: "/initramfs-linux.img", fileName: "arch.conf"}
+                - { imageName: "/initramfs-linux-fallback.img", fileName: "arch-fallback.conf"}
 
             - name: configure ramdisk
               copy:
@@ -631,7 +624,7 @@
             state: present
 
         - name: install android tools
-          shell: "PATH=/home/{{ user }}/android-sdk/cmdline-tools/latest/bin:$PATH echo y | sdkmanager '{{ item }}'"
+          shell: "echo y | /home/{{ user }}/android-sdk/cmdline-tools/latest/bin/sdkmanager '{{ item }}'"
           loop:
             - "emulator"
             - "platform-tools"
