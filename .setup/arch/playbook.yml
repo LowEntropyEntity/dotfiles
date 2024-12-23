@@ -412,6 +412,9 @@
             regexp: '^(.*)HandleLidSwitch='
             line: "HandleLidSwitch=ignore"
 
+        - name: set java sdk
+          command: archlinux-java set java-23-openjdk
+
         - name: grant wheel group sudo
           copy:
             content: "%wheel ALL=(ALL) NOPASSWD: ALL\n"
@@ -460,7 +463,7 @@
           command: nvidia-ctk config --set nvidia-container-cli.no-cgroups --in-place
 
     - name: user specific
-      when: user|length == 0
+      when: user|length != 0
       block:
 
         - name: create xdg dirs
@@ -570,10 +573,9 @@
           when: aur_directories|length > 0
 
         - name: install aur packages with yay
-          command: yay -S --noconfirm {{ item }}
+          command: yay -S --needed --noconfirm {{ item }}
           ignore_errors: true
           with_items:
-            - java-service-wrapper
             - swaylock-effects
             - swww
 
@@ -598,6 +600,9 @@
             - postman-bin
             - visual-studio-code-bin
           register: yay_install_results
+          retries: 2
+          delay: 5
+          until: yay_install_results.rc == 0
 
         - name: show yay installation failures
           debug:
@@ -605,65 +610,50 @@
           with_items: "{{ yay_install_results.results }}"
           when: item.rc != 0
 
-        # - name: reset android studio sdk directory
-        #   file:
-        #     path: "/home/{{ user }}/android-sdk"
-        #     state: absent
+        - name: check if cmdline-tools destination file exists
+          stat:
+            path: /home/{{ user }}/android-sdk/cmdline-tools/latest
+          register: cmdlinetools_destination
 
-        # - name: create android studio dirs
-        #   file:
-        #     path: "{{ item }}"
-        #     state: directory
-        #   loop:
-        #     - "/home/{{ user }}/android-sdk/platforms"
-        #     - "/home/{{ user }}/android-sdk/emulator"
-        #     - "/home/{{ user }}/android-sdk/cmdline-tools/latest"
-        #     - "/home/{{ user }}/android-sdk/build-tools/35.0.0"
-        #     - "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
-        #     - "/home/{{ user }}/android-sdk/sources/android-34"
+        - name: create android studio cmdline-tools directory
+          file:
+            path: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+            state: directory
 
-        # - name: install android cmdline-tools
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
-        #     dest: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/cmdline-tools/latest/bin"
+        - name: install android cmdline-tools
+          unarchive:
+            src: "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+            dest: /tmp
+            remote_src: yes
+          when: not cmdlinetools_destination.stat.exists
 
-        # # Android sources
-        # - name: install android sources
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/sources-34_r01.zip"
-        #     dest: "/home/{{ user }}/android-sdk/sources/android-34"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/sources/android-34/AndroidManifest.xml"
+        - name: move android cmdline-tools to proper location
+          shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/android-sdk/cmdline-tools/latest"
+          when: not cmdlinetools_destination.stat.exists
 
-        # - name: install android build-tools
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/build-tools_r36-rc1_linux.zip"
-        #     dest: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/build-tools/36.0.0-4c1/bin"
+        - name: add android studio commandline tools to PATH
+          lineinfile:
+            path: "/home/{{ user }}/.zshrc"
+            line: 'export PATH="$HOME/android-sdk/cmdline-tools/latest/bin:$PATH"'
+            state: present
 
-        # - name: install android platform-tools
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
-        #     dest: "/home/{{ user }}/android-sdk"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/platform-tools/adb"
-
-        # - name: install android platform 34-ext7
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/platform-34-ext7_r02.zip"
-        #     dest: "/home/{{ user }}/android-sdk/platforms"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/platforms/android-34-ext7/package.xml"
-
-        # - name: install android emulator
-        #   unarchive:
-        #     src: "https://dl.google.com/android/repository/emulator-linux_x64-12414864.zip"
-        #     dest: "/home/{{ user }}/android-sdk/emulator"
-        #     remote_src: yes
-        #     creates: "/home/{{ user }}/android-sdk/emulator/emulator"
+        - name: install android tools
+          shell: "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$PATH echo y | sdkmanager '{{ item }}'"
+          loop:
+            - "emulator"
+            - "platform-tools"
+            - "tools"
+            - "build-tools;36.0.0-rc3"
+            - "platforms;android-35"
+            - "sources;android-35"
+            - "extras;android;m2repository"
+            - "extras;google;m2repository"
+            - "extras;google;webdriver"
+            - "--licenses"
+          register: sdkmanager_result
+          retries: 2
+          delay: 5
+          until: sdkmanager_result.rc == 0
 
         # - name: point flutter to android-sdk
         #   command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
@@ -672,13 +662,6 @@
         #   environment:
         #     HOME: "/home/{{ user }}"
         #   changed_when: false
-        #
-        # - name: accept android-studio sdk licenses
-        #   shell: yes | flutter doctor --android-licenses
-        #   args:
-        #     chdir: "/home/{{ user }}"
-        #   environment:
-        #     HOME: "/home/{{ user }}"
 
       become: true
       become_user: "{{ user }}"

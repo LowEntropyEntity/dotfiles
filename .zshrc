@@ -97,10 +97,8 @@ if [ -f ~/.env ]; then
 	export $(cat ~/.env | xargs)
 fi
 
-for file in ~/.env-*; do
-	if [[ -e $file ]]; then
-		export $(cat $file | xargs)
-	fi
+for file in ~/.env-*(N); do
+	export $(cat $file | xargs)
 done
 
 setopt completealiases
