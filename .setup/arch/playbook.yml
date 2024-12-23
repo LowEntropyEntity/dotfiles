@@ -10,10 +10,9 @@
 
     - name: user_password
       prompt: enter user password (leave blank if skipped above)
-      default: ""
-
-    - name: user_password_confirm
-      prompt: re-enter user password to confirm (leave blank if skipped above)
+      unsafe: true
+      private: true
+      confirm: true
       default: ""
 
     - name: hostname
@@ -41,12 +40,6 @@
             that:
               - not (ansible_user_id == 'root' and user|length == 0)
             fail_msg: "must specify a user when running as root"
-
-        - name: validate password
-          assert:
-            that:
-              - user|length == 0 or (user_password == user_password_confirm and user_password|length > 0)
-            fail_msg: "password must match and not be empty if user is specified"
 
         - name: pacman update
           pacman:
