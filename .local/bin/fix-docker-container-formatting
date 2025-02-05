@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# docker container ls -a --format json |
+
+jq '
+	# convert labels to json - "key1=value1,key2=value2"
+	.Labels |= (
+		if . == null or . == "" then
+			{}
+		else
+			[ match("(?<key>[^,=]+)=(?<val>.*?)(?=,[^,=]+=|$)"; "g") ]
+			| map(
+					{
+						(.captures[0].string): .captures[1].string
+					}
+				)
+			| add
+		end
+	)
+	|
+
+	if .Labels["com.docker.compose.project.config_files"]? then
+		.Labels["com.docker.compose.project.config_files"] |= (
+			if . == null or . == "" then
+				[]
+			else
+				split(",")
+			end
+		)
+	else
+		.
+	end
+	|
+
+	# convert `devcontainer.metadata` to json
+	if .Labels["devcontainer.metadata"]? then
+		.Labels["devcontainer.metadata"] |= fromjson?
+	else
+		.
+	end
+	|
+
+	# sort labels
+	.Labels |= ( to_entries | sort_by(.key) | from_entries )
+	|
+
+	# sort devcontainer.metadata
+	if ( .Labels["devcontainer.metadata"] | type ) == "array" then
+		.Labels["devcontainer.metadata"] |= sort_by(.id // "")
+	else
+		.
+	end
+'

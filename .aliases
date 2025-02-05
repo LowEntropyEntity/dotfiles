@@ -33,6 +33,7 @@ alias dev-up="devcontainer up \
 alias dev-clean='dev-up --remove-existing-container --build-no-cache'
 alias dev='devcontainer exec --workspace-folder .'
 alias dev-down='docker rm -f $(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")'
+alias dev-ls='docker container ls -a --filter "label=devcontainer.metadata" --format json | fix-docker-container-formatting | filter-docker-devcontainer-output'
 
 ### dotfiles and git
 alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'

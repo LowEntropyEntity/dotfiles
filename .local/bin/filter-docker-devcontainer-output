@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+LONG=false
+if [[ $1 == "--long" ]]; then
+	LONG=true
+fi
+
+jq --argjson longMode "$LONG" '
+	if $longMode then
+		{
+			ID,
+			CreatedAt,
+			Image,
+			Labels: (
+				.Labels
+				| with_entries(
+					select(
+						.key
+						| (
+							startswith("dev.containers.") or
+							startswith("devcontainer.") or
+							startswith("com.docker.compose.project") or
+							. == "org.opencontainers.image.title" or
+							. == "org.opencontainers.image.url" or
+							. == "org.opencontainers.image.version" or
+							. == "org.opencontainers.image.revision"
+						)
+					)
+				)
+			),
+			Names,
+			Networks,
+			Ports,
+			RunningFor,
+			Status
+		}
+	else
+		{
+			ID,
+			Image,
+			Labels: (
+				.Labels
+				| with_entries(
+					select(
+						.key
+						| (
+							. == "devcontainer.local_folder"
+						)
+					)
+				)
+			),
+			Names,
+			Status
+		}
+	end
+'
