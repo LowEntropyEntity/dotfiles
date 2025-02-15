@@ -1,0 +1,22 @@
+#!/bin/sh
+
+DOTFILES_WORK_TREE="${DOTFILES_WORK_TREE:-$HOME}"
+DOTFILES_GIT_DIR="${DOTFILES_GIT_DIR:-$DOTFILES_WORK_TREE/.dotfiles}"
+
+if /usr/bin/git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+	exec /usr/bin/git "$@"
+elif [ "$PWD" = "$DOTFILES_WORK_TREE" ] || [ "${PWD#"$DOTFILES_WORK_TREE"/}" != "$PWD" ]; then
+	case "$1" in
+		clone)
+			exec /usr/bin/git "$@"
+			;;
+		init)
+			exec /usr/bin/git "$@"
+			;;
+		*)
+			exec /usr/bin/git --git-dir="$DOTFILES_GIT_DIR" --work-tree="$DOTFILES_WORK_TREE" "$@"
+			;;
+	esac
+else
+	exec /usr/bin/git "$@"
+fi

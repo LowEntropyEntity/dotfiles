@@ -1,3 +1,11 @@
+lazyvim() {
+	docker run -w /root -it --rm alpine:edge sh -uelic '
+		apk add git lazygit fzf curl neovim ripgrep alpine-sdk --update
+		git clone https://github.com/LazyVim/starter ~/.config/nvim
+		cd ~/.config/nvim
+		sh
+	'
+}
 alias cd='pushd > /dev/null'
 alias p='popd'
 alias ..='pushd ..'
@@ -7,12 +15,16 @@ alias ....='pushd ../../..'
 if command -v eza &>/dev/null; then
 	alias l='eza -1 --classify'
 	alias lr='eza -1 -R --classify'
+	alias lt='eza -1 -T --classify'
 	alias la='eza -1 -a --classify'
 	alias lar='eza -1 -a -R --classify'
+	alias lat='eza -1 -a -T --classify'
 	alias ll='eza -l --classify'
 	alias llr='eza -l -R --classify'
+	alias llt='eza -l -T --classify'
 	alias lla='eza -l -a --classify'
 	alias llar='eza -l -a -R --classify'
+	alias llat='eza -l -a -T --classify'
 else
 	alias l='ls -1FG'
 	alias lr='ls -1FGR'
@@ -30,15 +42,29 @@ alias dev-up="devcontainer up \
 	--dotfiles-target-path="~/.dotfiles" \
 	--dotfiles-install-command ".local/bin/install-dotfiles" \
 	--workspace-folder ."
+alias dev-play="devcontainer up \
+	--additional-features \"\$(devcontainer-features-menu)\" \
+	--workspace-folder . \
+	--mount type=bind,source=/home/sean/.config/nvim/,target=/home/node/.config/nvim/"
 alias dev-clean='dev-up --remove-existing-container --build-no-cache'
-alias dev='devcontainer exec --workspace-folder .'
+dev() {
+	old_title=$(tmux display-message -p "#{pane_title}")
+	old_name=$(tmux display-message -p "#{window_name}")
+	target_window=$(tmux display-message -p "#{session_id}:#{window_id}")
+	target_pane=$(tmux display-message -p "#{session_id}:#{window_id}.#{pane_id}")
+	tmux rename-window "[$(basename $PWD)] ${old_name}"
+
+	devcontainer exec --remote-env DEV_CONTAINER=1 --workspace-folder . $@
+
+	tmux rename-window -t "$target_window" "$old_name"
+	tmux select-pane -t "$target_pane" -T "$old_title"
+}
 alias dev-down='docker rm -f $(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")'
 alias dev-ls='docker container ls -a --filter "label=devcontainer.metadata" --format json | fix-docker-container-formatting | filter-docker-devcontainer-output'
 
 ### dotfiles and git
-alias dot='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias dot-lzg='lazygit --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout && echo "dotfiles synced successfully"'
+alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$DOTFILES_GIT_DIR --work-tree=$DOTFILES_WORK_TREE checkout && echo "dotfiles synced successfully"'
+[[ -z "$DEV_CONTAINER" ]] && alias git='$HOME/.local/bin/dotfiles-git/git'
 alias lzg='lazygit'
 
 ### networking
@@ -49,6 +75,7 @@ alias now='date +"%F %T"'
 
 ### clipboard/sharing
 alias share-dir='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
+alias share-dir-ln='(tree -a; echo; find . -type f | while read f; do echo "===== $f ====="; cat --number "$f"; echo; done) | wl-copy'
 alias share-dir-git='(git ls-tree -r --name-only HEAD; echo; git ls-tree -r --name-only HEAD | while read f; do echo "===== $f ====="; cat "$f"; echo; done) | wl-copy'
 
 ### security and auth
@@ -87,7 +114,7 @@ alias tmp='cd $(mktemp -d)'
 alias tmp.='cd $(mktemp -d --tmpdir=./)'
 alias tmpfile='mktemp'
 alias tmpfile.='mktemp --tmpdir=./'
-alias vtemp='v $(tmpfile)'
+alias vtmp='v $(tmpfile)'
 
 ### remove and pop
 alias rm.='rm -frv $PWD && p'
@@ -104,6 +131,25 @@ alias redis='docker run --rm -p 6379:6379 redis'
 ### tmux
 alias tmux-restore-off='touch ~/tmux_no_auto_restore'
 alias tmux-restore-on='rm ~/tmux_no_auto_restore 2> /dev/null || true'
+if [[ -n "$DEV_CONTAINER" ]]; then
+	prn() {
+		name="${@}"
+		echo -e '\033]2;'$name'\007'
+	}
+else
+	alias ss='tmux choose-tree -Zs'
+	sn() {
+		name="$@"
+		tmux new-session -d -s "$name"
+		tmux switch-client -t "$name"
+	}
+	alias srn='tmux rename-session'
+	alias srm='tmux kill-session'
+	alias ww='tmux choose-tree -Zw'
+	alias wn='tmux new-window -n'
+	alias wrn='tmux rename-window'
+	alias wrm='tmux kill-window'
+fi
 
 ### editor
 if command -v nvim &>/dev/null; then
@@ -114,8 +160,10 @@ elif command -v vi &>/dev/null; then
 	alias v='vi'
 fi
 
+alias :q='exit'
+
 ### vpn
-alias vpn-work='sudo openconnect $EMPLOYER_VPN_ENDPOINT -u $EMPLOYER_USERNAME --useragent=AnyConnect'
+alias vpn-work='sudo openconnect $EMPLOYER_VPN_ENDPOINT -u $EMPLOYEE_USERNAME --useragent=AnyConnect --authgroup="Full-Tunnel"'
 
 ### zsh reload
 alias zshrc='omz reload'

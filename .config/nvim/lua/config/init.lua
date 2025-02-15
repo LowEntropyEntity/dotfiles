@@ -15,14 +15,17 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+require('config.autocmds')
 require('config.options')
 require('config.keymaps')
+require('config.languages')
 
-local opts = {
+require('lazy').setup({
+	spec = {
+		{ import = 'plugins' }
+	},
 	defaults = {
 		lazy = true,
 		version = '*',
-	},
-}
-
-require('lazy').setup({{import = 'plugins'}}, opts)
+	}
+})

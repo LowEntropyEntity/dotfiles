@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
-git --git-dir=$HOME/.dotfiles/.git --work-tree=$HOME checkout -f
+DOTFILES_WORK_TREE="${DOTFILES_WORK_TREE:-$HOME}"
+DOTFILES_GIT_DIR="${DOTFILES_GIT_DIR:-$DOTFILES_WORK_TREE/.dotfiles/.git}"
+
+git --git-dir=$DOTFILES_GIT_DIR --work-tree=$DOTFILES_WORK_TREE checkout -f

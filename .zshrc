@@ -4,7 +4,12 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="robbyrussell"
+if [[ -n "$DEV_CONTAINER" ]]; then
+	DISABLE_AUTO_TITLE="true"
+	ZSH_THEME="refined"
+else
+	ZSH_THEME="robbyrussell"
+fi
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -21,7 +26,7 @@ CASE_SENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
-zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode auto        # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
@@ -92,11 +97,15 @@ ZSH_CUSTOM=~/.oh-my-zsh-custom
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git direnv)
+if command -v direnv &>/dev/null; then
+	plugins=(git direnv)
+fi
 
 source $ZSH/oh-my-zsh.sh
 
-source <(fzf --zsh)
+if command -v fzf &>/dev/null; then
+	source <(fzf --zsh)
+fi
 
 # User configuration
 
@@ -109,10 +118,6 @@ source <(fzf --zsh)
 
 setopt completealiases
 
-export GPG_TTY="$(tty)"
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-gpg-connect-agent updatestartuptty /bye > /dev/null
-
 if [ -f ~/.motd ]; then
 	cat ~/.motd
 fi
@@ -122,6 +127,10 @@ if command -v thefuck &>/dev/null; then
 fi
 
 if [ ! -f /.dockerenv ]; then
+	export GPG_TTY="$(tty)"
+	export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+	gpg-connect-agent updatestartuptty /bye > /dev/null
+
 	gpg -K | grep sean@sean.xyz 1>/dev/null 2>&1 || gpg --card-status 1> /dev/null || echo 'private key not found: run gpg --card-status\n'
 
 	if [ ! -d ~/.password-store ]; then
@@ -137,9 +146,19 @@ if [ ! -f /.dockerenv ]; then
 	fi
 fi
 
+current_conflict_style=$(git config --global --get merge.conflictStyle || true)
+if git --version | grep -Eq '\s2\.35|\s2\.[4-9][0-9]|\s[3-9]'; then
+	if [ "$current_conflict_style" != "zdiff3" ]; then
+		git config --global merge.conflictStyle zdiff3
+	fi
+else
+	if [ "$current_conflict_style" != "diff3" ]; then
+		git config --global merge.conflictStyle diff3
+	fi
+fi
+
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 bindkey "^[[1~" beginning-of-line
 bindkey "^[[4~" end-of-line
-

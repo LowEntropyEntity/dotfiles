@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+alacritty --class "fzf-float" -e bash -c "browser-chooser $@ | xargs -I {} hyprctl dispatch exec \"uwsm app -- {}\""

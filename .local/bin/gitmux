@@ -1,0 +1,19 @@
+#!/bin/sh
+
+CONFIG_NORMAL="${XDG_CONFIG_HOME}/tmux/gitmux.conf"
+CONFIG_DOTFILES="${XDG_CONFIG_HOME}/tmux/gitmux.dotfiles.conf"
+
+DOTFILES_WORK_TREE="${DOTFILES_WORK_TREE:-$HOME}"
+DOTFILES_GIT_DIR="${DOTFILES_GIT_DIR:-$DOTFILES_WORK_TREE/.dotfiles}"
+
+dir="${1:-$PWD}"
+
+if /usr/bin/git -C "$dir" rev-parse --is-inside-work-tree 2>/dev/null 1>/dev/null; then
+	config="$CONFIG_NORMAL"
+elif /usr/bin/git --git-dir="$DOTFILES_GIT_DIR" --work-tree="$DOTFILES_WORK_TREE" -C "$dir" rev-parse --is-inside-work-tree 2>/dev/null 1>/dev/null; then
+	config="$CONFIG_DOTFILES"
+else
+	config="$CONFIG_NORMAL"
+fi
+
+PATH="$HOME/.local/bin/dotfiles-git:$PATH "exec /usr/bin/gitmux -cfg "$config" "$dir"

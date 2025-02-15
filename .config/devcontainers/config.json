@@ -6,6 +6,16 @@
 			"options": {}
 		},
 		{
+			"id": "ghcr.io/devcontainers-extra/features/ripgrep:1",
+			"selected": true,
+			"options": {}
+		},
+		{
+			"id": "ghcr.io/devcontainers/features/rust:1",
+			"selected": true,
+			"options": {}
+		},
+		{
 			"id": "ghcr.io/devcontainers/features/node:1",
 			"options": {}
 		},

@@ -25,10 +25,10 @@
 	# show commit logs on a single line each
 	lgbase = log --pretty='%C(auto)%h %C(reset)%C(dim white)%ad%C(reset)%C(auto)%d%C(reset) %C(auto)%s%C(reset) %C(dim white)- %an%C(reset) %C(cyan)%G? %GS%C(reset)'
 	lga = lgbase --full-history # no prune
-	lg  = lgbase -10 # limit number of commits shown
+	lg = "lgbase --since=\"2 weeks ago\"" # limit number of commits shown
 	# show commit logs with a list of changed files
 	lla = lga --decorate --stat
-	ll  = lla -5 # limit number of commits shown
+	ll = "lla --since=\"2 weeks ago\"" # limit number of commits shown
 
 	grep-all = ! git grep --untracked --no-exclude-standard
 	grep-tree = ! git grep
@@ -99,6 +99,12 @@
 	clean = git-sops-diff clean yaml %f
 	required = true
 
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+
 [format]
 	pretty = %C(auto)%h %H %d%C(reset)%n%C(dim white)%an <%ae>%C(reset) %C(cyan)%G? %GS%C(reset)%n%C(dim white)%ad%C(reset)%n%n    %s%C(reset)%n
 
@@ -109,6 +115,12 @@
 [include]
 	path = ~/.config/delta/themes/themes.gitconfig
 
+[includeIf "gitdir:~/work/"]
+	path = ~/work/.gitconfig
+
+[includeIf "gitdir:~/.dotfiles"]
+	path = ~/.config/git/config.dotfiles
+
 [init]
 	defaultBranch = main
 
@@ -118,8 +130,13 @@
 [log]
 	date = iso
 
+[maintenance]
+	auto = true
+	strategy = incremental
+	repo = ~
+
 [merge]
-	conflictstyle = zdiff3
+	conflictStyle = zdiff3
 
 [pager]
 	blame = delta
@@ -133,6 +150,12 @@
 [push]
 	autoSetupRemote = true
 
+[rebase]
+	autoStash = true
+
+[rerere]
+	enabled = true
+
 [stash]
 	showPatch = true
 	showStash = true
@@ -145,22 +168,5 @@
 	name = sean simonsen
 	signingkey = 0xE81D523E5DD412E2
 
-[includeIf "gitdir:~/work/"]
-	path = ~/work/.gitconfig
-
 [safe]
 	directory = /opt/flutter
-
-[filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-
-[rerere]
-	enabled = true
-
-[maintenance]
-	auto = true
-	strategy = incremental
-	repo = ~

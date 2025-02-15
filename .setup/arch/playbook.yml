@@ -511,25 +511,13 @@
             bare: yes
           register: dotfiles_clone
 
-        - name: set dotfiles push remote
-          git_config:
-            name: remote.origin.pushurl
-            value: git@github.com:LowEntropyEntity/.dotfiles.git
-            repo: "/home/{{ user }}/.dotfiles"
-            scope: local
-          when: dotfiles_clone is changed or dotfiles.stat.exists
-
-        - name: configure dotfiles to not show untracked files
-          git_config:
-            name: status.showUntrackedFiles
-            value: "no"
-            repo: "/home/{{ user }}/.dotfiles"
-            scope: local
-
         - name: checkout dotfiles
-          shell: "git --git-dir=/home/{{ user }}/.dotfiles/ --work-tree=/home/{{ user }} checkout -f {{ lookup('env','DOTFILES_BRANCH') | default('main') }}"
+          shell: "git --git-dir={{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_dir) }} --work-tree={{ lookup('env','DOTFILES_WORK_TREE') | default(user_home) }} checkout -f {{ lookup('env','DOTFILES_DEFAULT_BRANCH') | default('main') }}"
           args:
             chdir: "/home/{{ user }}/.dotfiles"
+          vars:
+            - user_home: "/home/{{ user }}"
+            - user_dotfiles_dir: "/home/{{ user }}/.dotfiles"
           register: debug
           when: dotfiles_clone is changed or not dotfiles.stat.exists
 
@@ -549,9 +537,12 @@
           when: "'1F86464D595F2DCD5F6029B6E81D523E5DD412E2' not in gpg_key_check.stdout"
 
         - name: sync submodules
-          shell: "git --git-dir=/home/{{ user }}/.dotfiles/ --work-tree=/home/{{ user }} submodule update --init"
+          shell: "git --git-dir={{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_dir) }} --work-tree={{ lookup('env','DOTFILES_WORK_TREE') | default(user_home) }} submodule update --init"
           args:
             chdir: "/home/{{ user }}/.dotfiles"
+          vars:
+            - user_home: "/home/{{ user }}"
+            - user_dotfiles_dir: "/home/{{ user }}/.dotfiles"
           ignore_errors: true
           register: debug
 

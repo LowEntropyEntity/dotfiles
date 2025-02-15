@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${TMPDIR:=/tmp}"
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+: "${DEFAULT_BROWSER:=chromium}"
+BROWSER="$DEFAULT_BROWSER"
+
+function pick_session() {
+	: "${PERSISTENT_DIRS:=$XDG_STATE_HOME/browser-sessions/$BROWSER}"
+	: "${AD_HOC_DIRS:=$TMPDIR/browser-sessions/$BROWSER}"
+
+	local sessions=()
+	local adhoc_sessions=()
+
+	if [[ -d "$PERSISTENT_DIRS" ]]; then
+		for d in "$PERSISTENT_DIRS"/*; do
+			[[ -d "$d" ]] && sessions+=("$d")
+		done
+	fi
+	if [[ -d "$AD_HOC_DIRS" ]]; then
+		for d in "$AD_HOC_DIRS"/*; do
+			[[ -d "$d" ]] && adhoc_sessions+=("$d")
+		done
+	fi
+
+	local fzf_output fzf_exit_code
+	set +e
+	fzf_output="$({
+		for d in "${sessions[@]}"; do
+			printf '%s\t- %s\n' "$d" "$(basename "$d")"
+		done
+		for d in "${adhoc_sessions[@]}"; do
+			printf '%s\t%s\n' "$d" "$(basename "$d")"
+		done
+	} \
+	| fzf \
+		--with-nth=2 \
+		--delimiter='\t' \
+		--preview 'echo {1}' \
+		--reverse \
+		--print-query
+	)"
+	fzf_exit_code=$?
+	set -e
+	[[ $fzf_exit_code -ne 0 && $fzf_exit_code -ne 1 ]] && exit "$fzf_exit_code"
+	
+	awk -v ad="$AD_HOC_DIRS/" '
+		NR == 1 { first = $0 }
+		NR == 2 { second = $0 }
+		END {
+			if (second != "") {
+				print second
+			}
+			else if (first != "") {
+				print ad first
+			}
+			else {
+				exit 1
+			}
+		}
+	' <<< "$fzf_output" \
+	| awk -F'\t' '{print $1}'
+}
+
+: "${WORK_BROWSER:=chromium}"
+: "${PRIVACY_BROWSER:=chromium}"
+: "${EMPLOYER_NAME:=}"
+: "${EMPLOYER_DOMAIN:=}"
+
+URL="${1:-}"
+# lowercase for comparisons
+LC_URL="${URL,,}"
+LC_EMPLOYER_NAME="${EMPLOYER_NAME,,}"
+LC_EMPLOYER_DOMAIN="${EMPLOYER_DOMAIN,,}"
+
+if [[ -z "${BROWSER_SESSION_TYPE:-}" ]]; then
+	if [[ -z "$URL" ]]; then
+		BROWSER_SESSION_TYPE="menu"
+	elif [[ -n "$LC_EMPLOYER_DOMAIN" && "$LC_URL" == *"$LC_EMPLOYER_DOMAIN"* ]]; then
+		BROWSER_SESSION_TYPE="work"
+	elif [[ -n "$LC_EMPLOYER_NAME" && "$LC_URL" == *"$LC_EMPLOYER_NAME"* ]]; then
+		BROWSER_SESSION_TYPE="work"
+	elif [[ "$LC_URL" == https://mail.* ]]; then
+		BROWSER_SESSION_TYPE="personal"
+	elif [[ "$LC_URL" == https://github.com/lowentropyentity/* ]]; then
+		BROWSER_SESSION_TYPE="personal"
+	else
+		BROWSER_SESSION_TYPE="menu"
+	fi
+fi
+
+DATA_DIR=""
+
+case "$BROWSER_SESSION_TYPE" in
+	menu)
+		DATA_DIR="$(pick_session)" || exit 1
+		;;
+	personal)
+		DATA_DIR="$XDG_STATE_HOME/browser-sessions/$BROWSER/$(whoami)"
+		;;
+	private)
+		BROWSER="$PRIVACY_BROWSER"
+		DATA_DIR="$(mktemp -d $TMPDIR/browser-session-XXXXXX)"
+		;;
+	tmp)
+		BROWSER="$PRIVACY_BROWSER"
+		DATA_DIR="$(mktemp -d $TMPDIR/browser-session-XXXXXX)"
+		;;
+	work)
+		BROWSER="$WORK_BROWSER"
+		DATA_DIR="$XDG_STATE_HOME/browser-sessions/$BROWSER/$LC_EMPLOYER_NAME"
+		;;
+esac
+
+BROWSER_FLAGS="--ozone-platform=wayland --use-gl=egl --enable-features=VaapiVideoDecoder --disable-features=UseChromeOSDirectVideoDecoder --restore-last-session --no-default-browser-check"
+
+COMMAND=("$BROWSER" $BROWSER_FLAGS --user-data-dir="$DATA_DIR" "$URL")
+echo "${COMMAND[@]}"

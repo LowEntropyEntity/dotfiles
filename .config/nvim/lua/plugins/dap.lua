@@ -1,6 +1,6 @@
 local dapui_config = function()
 	local dap, dapui = require('dap'), require('dapui')
-	dapui.setup({})
+	dapui.setup()
 	dap.listeners.before.attach.dapui_config = function()
 		dapui.open()
 	end
@@ -13,44 +13,82 @@ local dapui_config = function()
 	dap.listeners.before.event_exited.dapui_config = function()
 		dapui.close()
 	end
-	vim.keymap.set('n', '<leader>du', function() require('dapui').toggle({}) end, { desc = 'dap-ui: toggle' })
-	vim.keymap.set({ 'n', 'v' }, '<leader>de', function() require('dapui').eval() end, { desc = 'dap-ui: evaluate'})
 end
 
 local dap_config = function()
-	vim.keymap.set('n', '<F5>', function() require('dap').continue() end, { desc = 'dap: debug' } )
-	vim.keymap.set('n', '<leader>dbg', function() require('dap').continue() end, { desc = 'dap: debug' } )
+	require('mason').setup()
+	require('mason-nvim-dap').setup()
 
-	vim.keymap.set('n', '<F17>', function() require('dap').terminate() end, { desc = 'dap: stop debugging' } ) -- shift + F5
-	vim.keymap.set('n', '<F41>', function() require('dap').restart() end, { desc = 'dap: restart' } ) -- ctrl + shift + F5
-
-	vim.keymap.set('n', '<F10>', function() require('dap').step_over() end, { desc = 'dap: step over' } )
-	vim.keymap.set('n', '<F11>', function() require('dap').step_into() end, { desc = 'dap: step in' } )
-	vim.keymap.set('n', '<F23>', function() require('dap').step_out() end, { desc = 'dap: step out' } ) -- shift + F11
-	vim.keymap.set('n', '<leader>dn', function() require('dap').step_over() end, { desc = 'dap: step over' } )
-	vim.keymap.set('n', '<leader>di', function() require('dap').step_into() end, { desc = 'dap: step in' } )
-	vim.keymap.set('n', '<leader>do', function() require('dap').step_out() end, { desc = 'dap: step out' } )
-
-	vim.keymap.set('n', '<leader>b', function() require('dap').toggle_breakpoint() end, { desc = 'dap: toggle breakpoint' } )
-	vim.keymap.set('n', '<leader>B', function() require('dap').set_breakpoint() end, { desc = 'dap: set breakpoint' } )
-
-	vim.keymap.set('n', '<leader>lp', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('log point message: ')) end, { desc = 'dap: log point' } )
-	vim.keymap.set('n', '<leader>dr', function() require('dap').repl.open() end, { desc = 'dap: open debug console' } )
-	vim.keymap.set('n', '<leader>dl', function() require('dap').run_last() end, { desc = 'dap: run last' } )
+	local dap = require('dap.ext.vscode')
+	local status, json5 = pcall(require, 'json5')
+	if status then
+		dap.json_decode = json5.parse
+	else
+		vim.notify('could not load json5', vim.log.levels.WARN)
+	end
+	dap.load_launchjs(nil, {})
 end
 
 return {
 	{
-		'mfussenegger/nvim-dap',
+		'jay-babu/mason-nvim-dap.nvim',
+		cmd = {'DapInstall', 'DapUninstall'},
 		event = 'LspAttach',
+		opts = {
+			ensure_installed = {},
+			automatic_installation = true
+		},
+		config = function() end
+	},
+	{
+		'mfussenegger/nvim-dap',
+		-- cmd = {'DapInstall'},
+		-- event = 'LspAttach',
+		dependencies = {
+			'rcarriga/nvim-dap-ui',
+			{
+				'theHamsta/nvim-dap-virtual-text',
+				opts = {},
+			},
+			{
+				"Joakker/lua-json5",
+				build = './install.sh',
+			},
+		},
+		keys = {
+			{ '<leader>d', '', desc = '+debug', mode = {'n', 'v'} },
+			{ '<F5>', function()require('dap').continue() end, desc = 'debug' },
+			{ '<leader>dd', function()require('dap').continue() end, desc = 'debug' },
+
+			{ '<F17>', function()require('dap').terminate() end, desc = 'stop debugging' }, -- shift + F5
+			{ '<F41>', function()require('dap').restart() end, desc = 'restart' }, -- ctrl + shift + F5
+
+			{ '<F10>', function()require('dap').step_over() end, desc = 'step over' },
+			{ '<F11>', function()require('dap').step_into() end, desc = 'step in' },
+			{ '<F23>', function()require('dap').step_out() end, desc = 'step out' }, -- shift + F11
+			{ '<leader>dj', function()require('dap').step_over() end, desc = 'step over' },
+			{ '<leader>dl', function()require('dap').step_into() end, desc = 'step in' },
+			{ '<leader>dh', function()require('dap').step_out() end, desc = 'step out' },
+
+			{ '<leader>db', function()require('dap').toggle_breakpoint() end, desc = 'toggle breakpoint' },
+			{ '<leader>dB', function()require('dap').set_breakpoint() end, desc = 'set breakpoint' },
+
+			{ '<leader>dL', function()require('dap').set_breakpoint(nil, nil, vim.fn.input('log point message: ')) end, desc = 'log point' },
+			{ '<leader>d:', function()require('dap').repl.open() end, desc = 'open debug console' },
+		},
 		config = dap_config
 	},
 	{
 		'rcarriga/nvim-dap-ui',
 		event = 'LspAttach',
+		keys = {
+			{ '<leader>dui', function() require('dapui').toggle({}) end, desc = 'toggle' },
+			{ '<leader>de', function() require('dapui').eval() end, desc = 'evaluate', mode = { 'n', 'v' }},
+		},
 		config = dapui_config,
 		dependencies = {
+			'mfussenegger/nvim-dap',
 			'nvim-neotest/nvim-nio'
 		}
-	}
+	},
 }

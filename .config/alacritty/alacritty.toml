@@ -18,7 +18,15 @@ args = ["attach-session"]
 program = "/usr/bin/tmux"
 
 [window]
-opacity = 0.9
+opacity = 0.92
 
 [general]
 import = ["/home/sean/.config/alacritty/catppuccin/catppuccin-mocha.toml"]
+
+[keyboard]
+bindings = [ # https://stackoverflow.com/a/78694090
+  { key = "H", mods = "Control|Shift", chars = "\u25c2" },
+  { key = "J", mods = "Control|Shift", chars = "\u25be" },
+  { key = "K", mods = "Control|Shift", chars = "\u25b4" },
+  { key = "L", mods = "Control|Shift", chars = "\u25b8" },
+]

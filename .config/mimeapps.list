@@ -1,0 +1,6 @@
+
+[Default Applications]
+x-scheme-handler/postman=Postman.desktop
+x-scheme-handler/https=browser.desktop
+x-scheme-handler/http=browser.desktop
+text/html=browser.desktop
