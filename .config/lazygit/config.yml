@@ -1,2 +1,5 @@
 git:
   autoFetch: false
+  paging:
+    colorArg: always
+    pager: sed 's/\t/➝  /g' | sed 's/\xC2\xA0/␣/g' | delta --features=arctic-fox --tabs=3 --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"

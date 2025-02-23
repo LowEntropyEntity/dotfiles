@@ -13,20 +13,33 @@ style = "Italic"
 family = "Hack Nerd Font Mono"
 style = "Regular"
 
+[terminal]
+osc52 = "CopyPaste"
+
 [terminal.shell]
 args = ["attach-session"]
 program = "/usr/bin/tmux"
 
 [window]
-opacity = 0.92
+opacity = 0.96
 
 [general]
-import = ["/home/sean/.config/alacritty/catppuccin/catppuccin-mocha.toml"]
+import = ["~/.config/alacritty/catppuccin/catppuccin-mocha.toml"]
 
 [keyboard]
 bindings = [ # https://stackoverflow.com/a/78694090
-  { key = "H", mods = "Control|Shift", chars = "\u25c2" },
-  { key = "J", mods = "Control|Shift", chars = "\u25be" },
-  { key = "K", mods = "Control|Shift", chars = "\u25b4" },
-  { key = "L", mods = "Control|Shift", chars = "\u25b8" },
+  { key = "H", mods = "Control|Shift", chars = "◂" },
+  { key = "J", mods = "Control|Shift", chars = "▾" },
+  { key = "K", mods = "Control|Shift", chars = "▴" },
+  { key = "L", mods = "Control|Shift", chars = "▸" },
+  { key = "!", mods = "Alt|Shift", chars = "➊" },
+  { key = "@", mods = "Alt|Shift", chars = "➋" },
+  { key = "#", mods = "Alt|Shift", chars = "➌" },
+  { key = "$", mods = "Alt|Shift", chars = "➍" },
+  { key = "%", mods = "Alt|Shift", chars = "➎" },
+  { key = "^", mods = "Alt|Shift", chars = "➏" },
+  { key = "&", mods = "Alt|Shift", chars = "➐" },
+  { key = "*", mods = "Alt|Shift", chars = "➑" },
+  { key = "(", mods = "Alt|Shift", chars = "➒" },
+  { key = ")", mods = "Alt|Shift", chars = "➓" },
 ]

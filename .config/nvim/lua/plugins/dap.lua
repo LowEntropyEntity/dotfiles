@@ -51,8 +51,7 @@ return {
 				opts = {},
 			},
 			{
-				"Joakker/lua-json5",
-				build = './install.sh',
+				'Joakker/lua-json5',
 			},
 		},
 		keys = {
@@ -90,5 +89,18 @@ return {
 			'mfussenegger/nvim-dap',
 			'nvim-neotest/nvim-nio'
 		}
+	},
+	{
+		'Joakker/lua-json5',
+		lazy = false,
+		build = './install.sh',
+		priority = 1000
+	},
+	{
+		'leoluz/nvim-dap-go',
+		ft = 'go',
+		config = function()
+			require('dap-go').setup()
+		end
 	},
 }

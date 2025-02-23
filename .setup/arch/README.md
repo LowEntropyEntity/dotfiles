@@ -24,8 +24,8 @@ This guide explains how to bootstrap a new Arch Linux installation using the pro
 
 1. **Fetch the archinstall config**
    ```bash
-   export DOTFILES_DEFAULT_BRANCH=main
-   curl https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/${DOTFILES_DEFAULT_BRANCH:-main}/.setup/arch/archinstall.config > /mnt/archinstall.config
+   export DOTFILES_GIT_DEFAULT_BRANCH=main
+   curl https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/${DOTFILES_GIT_DEFAULT_BRANCH:-main}/.setup/arch/archinstall.config > /mnt/archinstall.config
    ```
 
 2. **Run archinstall**
@@ -50,8 +50,8 @@ This should install a base Arch system, apply the configuration, and set up the 
 
 2. **Download the ansible playbook**
    ```bash
-   export DOTFILES_DEFAULT_BRANCH=main
-   curl https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/refs/heads/${DOTFILES_DEFAULT_BRANCH:-main}/.setup/arch/Makefile > Makefile
+   export DOTFILES_GIT_DEFAULT_BRANCH=main
+   curl https://raw.githubusercontent.com/LowEntropyEntity/.dotfiles/refs/heads/${DOTFILES_GIT_DEFAULT_BRANCH:-main}/.setup/arch/Makefile > Makefile
    ```
 
 3. **Run `make`**

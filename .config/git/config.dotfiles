@@ -1,11 +1,8 @@
 [alias]
 	grep-all = "!sh -c 'echo \"error: in dotfiles\" >&2; exit 1'"
 
+[core]
+	excludesFile = ~/.gitignore.dotfiles
+
 [oh-my-zsh]
 	hide-info = 1
-
-[remote "origin"]
-	pushurl = git@github.com:LowEntropyEntity/.dotfiles.git
-
-[status]
-	showUntrackedFiles = no

@@ -53,7 +53,23 @@ opt.splitbelow = true
 opt.autochdir = false
 opt.iskeyword:append('-')
 opt.mouse:append('a')
-opt.clipboard:append('unnamedplus')
+
+opt.clipboard:append({'unnamed', 'unnamedplus'})
+local in_dev_container = (os.getenv('DEV_CONTAINER') ~= nil)
+if in_dev_container then
+	vim.g.clipboard = {
+		name = 'OSC 52',
+		copy = {
+			['+'] = require('vim.ui.clipboard.osc52').copy('+'),
+			['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+		},
+		paste = {
+			['+'] = require('vim.ui.clipboard.osc52').paste('+'),
+			['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+		},
+	}
+end
+
 opt.modifiable = true
 opt.guicursor = 'n-v-c:block,i-ci-ve:block,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
 opt.encoding = 'UTF-8'

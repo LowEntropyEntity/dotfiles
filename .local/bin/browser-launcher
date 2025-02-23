@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-alacritty --class "fzf-float" -e bash -c "browser-chooser $@ | xargs -I {} hyprctl dispatch exec \"uwsm app -- {}\""
+alacritty --class "fzf-float" -e bash -c '
+	set -euo pipefail
+	command="$(browser-chooser "$@")"
+	hyprctl dispatch exec "uwsm app -- $command"
+' _ "$@"

@@ -11,6 +11,10 @@ alias p='popd'
 alias ..='pushd ..'
 alias ...='pushd ../..'
 alias ....='pushd ../../..'
+alias 2..='pushd ../..'
+alias 3..='pushd ../../..'
+alias 4..='pushd ../../../..'
+alias 5..='pushd ../../../../..'
 
 if command -v eza &>/dev/null; then
 	alias l='eza -1 --classify'
@@ -42,30 +46,28 @@ alias dev-up="devcontainer up \
 	--dotfiles-target-path="~/.dotfiles" \
 	--dotfiles-install-command ".local/bin/install-dotfiles" \
 	--workspace-folder ."
-alias dev-play="devcontainer up \
-	--additional-features \"\$(devcontainer-features-menu)\" \
-	--workspace-folder . \
-	--mount type=bind,source=/home/sean/.config/nvim/,target=/home/node/.config/nvim/"
 alias dev-clean='dev-up --remove-existing-container --build-no-cache'
 dev() {
-	old_title=$(tmux display-message -p "#{pane_title}")
-	old_name=$(tmux display-message -p "#{window_name}")
-	target_window=$(tmux display-message -p "#{session_id}:#{window_id}")
-	target_pane=$(tmux display-message -p "#{session_id}:#{window_id}.#{pane_id}")
-	tmux rename-window "[$(basename $PWD)] ${old_name}"
-
+	tmux set -p allow-passthrough on # for OSC 52 paste
+	tmux set -p @window_prefix "[$(basename $PWD)] "
 	devcontainer exec --remote-env DEV_CONTAINER=1 --workspace-folder . $@
-
-	tmux rename-window -t "$target_window" "$old_name"
-	tmux select-pane -t "$target_pane" -T "$old_title"
+	tmux set -pu @window_prefix
+	tmux set -p allow-passthrough off
 }
-alias dev-down='docker rm -f $(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")'
+dev-down() {
+	container_id=$(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")
+	if [ -z "${container_id}" ]; then
+		echo "dev container not found"
+		return 1
+	else
+		docker rm -f $container_id
+	fi
+}
 alias dev-ls='docker container ls -a --filter "label=devcontainer.metadata" --format json | fix-docker-container-formatting | filter-docker-devcontainer-output'
 
 ### dotfiles and git
-alias dot-sync='dot pull --rebase --autostash && dot reset -- $HOME && dot ls-files --deleted -z | xargs -0 git --git-dir=$DOTFILES_GIT_DIR --work-tree=$DOTFILES_WORK_TREE checkout && echo "dotfiles synced successfully"'
-[[ -z "$DEV_CONTAINER" ]] && alias git='$HOME/.local/bin/dotfiles-git/git'
-alias lzg='lazygit'
+alias dot='GIT_DIR=$DOTFILES_GIT_DIR GIT_WORK_TREE=$DOTFILES_GIT_WORK_TREE git'
+alias home='DOTFILES_MODE= GIT_DIR=$HOME_GIT_DIR GIT_WORK_TREE=$HOME_GIT_WORK_TREE git'
 
 ### networking
 alias lsports='ss -tulpn'
@@ -129,26 +131,24 @@ alias adbmirror='adb shell screenrecord --output-format=h264 - | ffplay -framera
 alias redis='docker run --rm -p 6379:6379 redis'
 
 ### tmux
-alias tmux-restore-off='touch ~/tmux_no_auto_restore'
-alias tmux-restore-on='rm ~/tmux_no_auto_restore 2> /dev/null || true'
-if [[ -n "$DEV_CONTAINER" ]]; then
-	prn() {
-		name="${@}"
-		echo -e '\033]2;'$name'\007'
-	}
-else
+if [[ -n "$TMUX" ]]; then
+	alias tmux-restore-off='touch ~/tmux_no_auto_restore'
+	alias tmux-restore-on='rm ~/tmux_no_auto_restore 2> /dev/null || true'
+	alias cds='cd $(tmux display-message -p "#{session_path}") && dirs -c'
+	alias cdw='cd $(tmux display-message -p "#{?@window_path,#{@window_path},#{session_path}}") && dirs -c'
 	alias ss='tmux choose-tree -Zs'
 	sn() {
 		name="$@"
-		tmux new-session -d -s "$name"
+		tmux new-session -d -s "$name" -c ~ -e FZF_DEFAULT_OPTS="--tmux center,border-native"
 		tmux switch-client -t "$name"
 	}
 	alias srn='tmux rename-session'
-	alias srm='tmux kill-session'
+	alias srm='tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
 	alias ww='tmux choose-tree -Zw'
 	alias wn='tmux new-window -n'
 	alias wrn='tmux rename-window'
 	alias wrm='tmux kill-window'
+	alias v.='IN_CAPTURE_PANE=1 tmux capture-pane -p -J -S - -E - | $EDITOR'
 fi
 
 ### editor
@@ -167,4 +167,3 @@ alias vpn-work='sudo openconnect $EMPLOYER_VPN_ENDPOINT -u $EMPLOYEE_USERNAME --
 
 ### zsh reload
 alias zshrc='omz reload'
-

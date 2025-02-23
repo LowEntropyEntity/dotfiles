@@ -111,8 +111,9 @@ local function install_mason_tools(config)
 	if config.mason and config.mason.tools then
 		for _, tool in ipairs(config.mason.tools) do
 			if not mason_registry.is_installed(tool) then
-				vim.notify('Installing ' .. tool, vim.log.levels.INFO)
+				vim.notify('Installing ' .. tool .. '...', vim.log.levels.INFO)
 				vim.cmd('MasonInstall ' .. tool)
+				vim.notify('Installed ' .. tool, vim.log.levels.INFO)
 			end
 		end
 	end
@@ -122,8 +123,9 @@ local function install_mason_tools(config)
 			if config.dap.config.mason and config.dap.config.mason.tools then
 				for _, tool in ipairs(config.dap.config.mason.tools) do
 					if not mason_registry.is_installed(tool) then
-						vim.notify('Installing dap ' .. tool, vim.log.levels.INFO)
+						vim.notify('Installing dap ' .. tool .. '...', vim.log.levels.INFO)
 						vim.cmd('MasonInstall ' .. tool)
+						vim.notify('Installed dap ' .. tool, vim.log.levels.INFO)
 					end
 				end
 			end
@@ -194,4 +196,16 @@ vim.api.nvim_create_autocmd("DirChanged", {
 	callback = function()
 		install_mason_tools_for_dir()
 	end,
+})
+
+vim.api.nvim_create_autocmd('StdinReadPost', {
+	callback = function()
+		vim.cmd(':$')
+		local in_capture_pane = (os.getenv('IN_CAPTURE_PANE') ~= nil)
+		if in_capture_pane then
+			vim.cmd(':%s/\\_s*\\%$//e') -- remove blank lines at end of buffer
+			vim.cmd('%s/\\s*$//') -- remove trailing spaces
+		end
+		vim.cmd(':set nomodified')
+	end
 })

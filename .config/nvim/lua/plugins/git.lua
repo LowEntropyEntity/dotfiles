@@ -18,7 +18,12 @@ local gitsigns_config = function()
 end
 
 return {
-	'lewis6991/gitsigns.nvim',
-	event = 'VeryLazy',
-	config = gitsigns_config
+	{
+		'lewis6991/gitsigns.nvim',
+		event = 'VeryLazy',
+		config = gitsigns_config
+	},
+	{
+		'tpope/vim-fugitive'
+	}
 }

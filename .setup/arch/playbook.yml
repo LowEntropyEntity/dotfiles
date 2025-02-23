@@ -141,6 +141,7 @@
             - poppler
             - ripgrep
             - yazi
+            - yq
             - zbar                       # Barcode/QR code scanner CLI tools
             - zoxide
 
@@ -491,39 +492,55 @@
     - name: user specific
       when: user|length != 0
       block:
+        vars:
+          user_home: "/home/{{ user }}"
+          user_home_git_dir: "/home/{{ user }}/.home"
+          user_dotfiles_git_dir: "/home/{{ user }}/.dotfiles"
 
         - name: configure rust
           command: rustup default stable
           args:
-            chdir: "/home/{{ user }}"
+            chdir: "{{ user_home }}"
           environment:
-            HOME: "/home/{{ user }}"
+            HOME: "{{ user_home }}"
 
         - name: check if dotfiles are downloaded
-          stat: "path=/home/{{ user }}/.dotfiles"
+          stat: "path={{ user_dotfiles_git_dir }}"
           register: dotfiles
 
         - name: clone dotfiles
           when: not dotfiles.stat.exists
           git:
             repo: https://github.com/LowEntropyEntity/.dotfiles.git
-            dest: "/home/{{ user }}/.dotfiles/"
+            dest: "{{ user_dotfiles_git_dir }}"
             bare: yes
           register: dotfiles_clone
 
         - name: checkout dotfiles
-          shell: "git --git-dir={{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_dir) }} --work-tree={{ lookup('env','DOTFILES_WORK_TREE') | default(user_home) }} checkout -f {{ lookup('env','DOTFILES_DEFAULT_BRANCH') | default('main') }}"
+          shell: "git checkout -f {{ lookup('env','DOTFILES_GIT_DEFAULT_BRANCH') | default('main', true) }}"
           args:
-            chdir: "/home/{{ user }}/.dotfiles"
-          vars:
-            - user_home: "/home/{{ user }}"
-            - user_dotfiles_dir: "/home/{{ user }}/.dotfiles"
+            chdir: "{{ user_dotfiles_git_dir }}"
+          environment:
+            GIT_DIR: "{{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_git_dir, true) }}"
+            GIT_WORK_TREE: "{{ lookup('env','DOTFILES_GIT_WORK_TREE') | default(user_home, true) }}"
           register: debug
+          when: dotfiles_clone is changed or not dotfiles.stat.exists
+
+        - name: config dotfiles
+          git_config:
+            name: "includeif.gitdir:~/.dotfiles.path"
+            value: "~/.config/git/config.dotfiles"
+          environment:
+            GIT_DIR: "{{ lookup('env','DOTFILES_GIT_DIR') | default(user_home_git_dir, true) }}"
           when: dotfiles_clone is changed or not dotfiles.stat.exists
 
         - debug:
             msg: "{{ debug.stdout }}"
           when: dotfiles_clone is changed or not dotfiles.stat.exists
+
+        - name: check if home files are downloaded
+          stat: "path={{ user_home_git_dir }}"
+          register: home
 
         - name: import gpg key
           command: gpg --locate-key sean@sean.xyz
@@ -536,13 +553,19 @@
           shell: echo "1F86464D595F2DCD5F6029B6E81D523E5DD412E2:6:" | gpg --import-ownertrust
           when: "'1F86464D595F2DCD5F6029B6E81D523E5DD412E2' not in gpg_key_check.stdout"
 
-        - name: sync submodules
-          shell: "git --git-dir={{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_dir) }} --work-tree={{ lookup('env','DOTFILES_WORK_TREE') | default(user_home) }} submodule update --init"
-          args:
-            chdir: "/home/{{ user }}/.dotfiles"
-          vars:
-            - user_home: "/home/{{ user }}"
-            - user_dotfiles_dir: "/home/{{ user }}/.dotfiles"
+        - name: sync dotfiles submodules
+          shell: "git submodule update --init"
+          environment:
+            GIT_DIR: "{{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_git_dir, true) }}"
+            GIT_WORK_TREE: "{{ lookup('env','DOTFILES_GIT_WORK_TREE') | default(user_home, true) }}"
+          ignore_errors: true
+          register: debug
+
+        - name: sync home submodules
+          shell: "git submodule update --init"
+          environment:
+            GIT_DIR: "{{ lookup('env','HOME_GIT_DIR') | default(user_home_git_dir, true) }}"
+            GIT_WORK_TREE: "{{ lookup('env','HOME_GIT_WORK_TREE') | default(user_home, true) }}"
           ignore_errors: true
           register: debug
 
@@ -615,12 +638,12 @@
 
         - name: check if cmdline-tools destination file exists
           stat:
-            path: /home/{{ user }}/android-sdk/cmdline-tools/latest
+            path: /home/{{ user }}/.android-sdk/cmdline-tools/latest
           register: cmdlinetools_destination
 
         - name: create android studio cmdline-tools directory
           file:
-            path: "/home/{{ user }}/android-sdk/cmdline-tools/latest"
+            path: "/home/{{ user }}/.android-sdk/cmdline-tools/latest"
             state: directory
 
         - name: install android cmdline-tools
@@ -631,11 +654,11 @@
           when: not cmdlinetools_destination.stat.exists
 
         - name: move android cmdline-tools to proper location
-          shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/android-sdk/cmdline-tools/latest"
+          shell: "mv /tmp/cmdline-tools/* /home/{{ user }}/.android-sdk/cmdline-tools/latest"
           when: not cmdlinetools_destination.stat.exists
 
         - name: install android tools
-          shell: "echo y | /home/{{ user }}/android-sdk/cmdline-tools/latest/bin/sdkmanager '{{ item }}'"
+          shell: "echo y | /home/{{ user }}/.android-sdk/cmdline-tools/latest/bin/sdkmanager '{{ item }}'"
           loop:
             - "emulator"
             - "platform-tools"
@@ -704,7 +727,7 @@
           when: not rootless_install.stat.exists
 
         # - name: point flutter to android-sdk
-        #   command: "flutter config --android-sdk /home/{{ user }}/android-sdk"
+        #   command: "flutter config --android-sdk /home/{{ user }}/.android-sdk"
         #   args:
         #     chdir: "/home/{{ user }}"
         #   environment:

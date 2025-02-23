@@ -1,8 +1,5 @@
 ---@type LanguageConfig
 local M = {
-	dap = {
-		'leoluz/nvim-dap-go'
-	},
 	mason = {
 		tools = {
 			'delve',

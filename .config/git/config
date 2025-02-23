@@ -5,10 +5,10 @@
 	# execute shell script in repository's root directory
 	exec = "!exec "
 
-	diffs = !"git -c delta.side-by-side=true diff"
-	shows = !"git -c delta.side-by-side=true show"
-	diffu = !"git -c delta.side-by-side=false diff"
-	showu = !"git -c delta.side-by-side=false show"
+	diffs = !"cd \"$GIT_PREFIX\" && git -c delta.side-by-side=true diff"
+	shows = !"cd \"$GIT_PREFIX\" && git -c delta.side-by-side=true show"
+	diffu = !"cd \"$GIT_PREFIX\" && git -c delta.side-by-side=false diff"
+	showu = !"cd \"$GIT_PREFIX\" && git -c delta.side-by-side=false show"
 
 	# --force-with-lease is safer than --force in the case where someone's pushed after your last fetch
 	force-push = push --force-with-lease
@@ -28,22 +28,33 @@
 	lg = "lgbase --since=\"2 weeks ago\"" # limit number of commits shown
 	# show commit logs with a list of changed files
 	lla = lga --decorate --stat
-	ll = "lla --since=\"2 weeks ago\"" # limit number of commits shown
+	ll = lla --since=\"2 weeks ago\" # limit number of commits shown
 
-	grep-all = ! git grep --untracked --no-exclude-standard
-	grep-tree = ! git grep
+	grep-all = ! "cd \"$GIT_PREFIX\" && git grep --untracked --no-exclude-standard"
 
-	sops-print = cat-file -p
+	cat-previous = ! "f() { git cat-file -p $(git rev-list -n 1 HEAD -- ${GIT_PREFIX}${1})^:${GIT_PREFIX}${1}; }; f"
+	checkout-previous = ! "f() { git checkout $(git rev-list -n 1 HEAD -- ${GIT_PREFIX}${1})^ -- ${GIT_PREFIX}${1}; }; f"
+	prefix = ! "echo $GIT_PREFIX"
+
+	size-head = ! "f() { git cat-file -s \"HEAD:$GIT_PREFIX$1\"; }; f"
+	size-stage = ! "f() { git cat-file -s \":$GIT_PREFIX$1\"; }; f"
+	cat-head = ! "f() { git cat-file -p \"HEAD:$GIT_PREFIX$1\"; }; f"
+	cat-stage = ! "f() { git cat-file -p \":$GIT_PREFIX$1\"; }; f"
 
 	# list and show stashed changes
 	stashes = "!git stash list | awk -F: '{ printf \"\\033[33m\"$0\"\\033[0m\\n\\n\"; system(\"git stash show \" $1); print \"\";}' #"
 
 	# show compact status
-	st = ! git status --short --branch && echo "" && git stash list
+	st = ! git status --short --branch --untracked && echo "" && git stash list
 
 	# shows all tracked files in a tree-like format
 	tree = ls-tree -r --name-only HEAD
 	unstage = reset HEAD --
+
+	why-no = check-ignore --verbose
+
+[clean]
+	requireForce = false
 
 [commit]
 	gpgSign = true
@@ -56,15 +67,22 @@
 [delta]
 	features = arctic-fox
 	navigate = true # use n and N to move between diff sections
-	side-by-side = true
+	side-by-side = false
 	tabs = 3
 
 [delta "interactive"]
 	keep-plus-minus-markers = false
-	; side-by-side = true
 
 [diff]
 	colorMoved = default
+
+[diff "gpg-diff"]
+	textconv = cat
+
+[filter "gpg-filter"]
+	smudge = git-gpg-diff smudge %f
+	clean = git-gpg-diff clean %f
+	required = true
 
 [diff "sops-diff"]
 	textconv = cat
@@ -136,7 +154,11 @@
 	repo = ~
 
 [merge]
+	tool = nvimdiff
 	conflictStyle = zdiff3
+
+[mergetool "nvimdiff"]
+	layout = "LOCAL,(@MERGED/BASE),REMOTE"
 
 [pager]
 	blame = delta
@@ -167,6 +189,7 @@
 	email = sean@sean.xyz
 	name = sean simonsen
 	signingkey = 0xE81D523E5DD412E2
+	encryptionkey = 0xE81D523E5DD412E2
 
 [safe]
 	directory = /opt/flutter

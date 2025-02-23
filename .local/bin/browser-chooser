@@ -109,7 +109,7 @@ case "$BROWSER_SESSION_TYPE" in
 		;;
 	work)
 		BROWSER="$WORK_BROWSER"
-		DATA_DIR="$XDG_STATE_HOME/browser-sessions/$BROWSER/$LC_EMPLOYER_NAME"
+		DATA_DIR="$XDG_STATE_HOME/browser-sessions/$BROWSER/work"
 		;;
 esac
 

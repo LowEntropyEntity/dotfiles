@@ -1,7 +1,7 @@
 local catppuccin_config = function()
-	local in_docker = (os.getenv("DEV_CONTAINER") ~= nil)
+	local in_dev_container = (os.getenv("DEV_CONTAINER") ~= nil)
 	local flavor = 'mocha'
-	if in_docker then
+	if in_dev_container then
 		flavor = 'frappe'
 	end
 

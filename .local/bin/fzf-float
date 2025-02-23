@@ -2,8 +2,9 @@
 set -euo pipefail
 
 fzf \
-  --with-nth=2 \
-  --delimiter='\t' \
-  --preview 'echo {1}' \
-  --reverse \
+	--with-nth=2 \
+	--delimiter='\t' \
+	--preview 'echo {1}' \
+	--no-multi \
+	--reverse \
 | awk -F'\t' '{print $1}'
