@@ -40,19 +40,21 @@ else
 	alias llar='ls -lAFGR'
 fi
 
-alias dev-up="devcontainer up \
+alias dev-up-no-dotfiles="devcontainer up \
 	--additional-features \"\$(devcontainer-features-menu)\" \
-	--dotfiles-repository https://github.com/LowEntropyEntity/.dotfiles.git \
-	--dotfiles-target-path="~/.dotfiles" \
-	--dotfiles-install-command ".local/bin/install-dotfiles" \
 	--workspace-folder ."
-alias dev-clean='dev-up --remove-existing-container --build-no-cache'
+alias dev-up="dev-up-no-dotfiles \
+	--dotfiles-repository https://github.com/LowEntropyEntity/.dotfiles.git \
+	--dotfiles-target-path=\"~/.dotfiles\" \
+	--dotfiles-install-command \".local/bin/install-dotfiles\""
+alias dev-clean-no-dotfiles='dev-up-no-dotfiles --remove-existing-container --build-no-cache'
+alias dev-clean='dev-up -remove-existing-container --build-no-cache'
 dev() {
-	tmux set -p allow-passthrough on # for OSC 52 paste
+	# tmux set -p allow-passthrough on # for OSC 52 paste
 	tmux set -p @window_prefix "[$(basename $PWD)] "
-	devcontainer exec --remote-env DEV_CONTAINER=1 --workspace-folder . $@
+	devcontainer exec --remote-env DEV_CONTAINER=1 --workspace-folder . "$@"
 	tmux set -pu @window_prefix
-	tmux set -p allow-passthrough off
+	# tmux set -p allow-passthrough off
 }
 dev-down() {
 	container_id=$(docker ps -aq --filter "label=devcontainer.local_folder=$PWD")

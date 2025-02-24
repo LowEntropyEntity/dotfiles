@@ -8,12 +8,12 @@ keymap.set('n', '<C-h>', '<C-w>h', { desc = 'windows: navigate left' })
 keymap.set('n', '<C-j>', '<C-w>j', { desc = 'windows: navigate down' })
 keymap.set('n', '<C-k>', '<C-w>k', { desc = 'windows: navigate up' })
 keymap.set('n', '<C-l>', '<C-w>l', { desc = 'windows: navigate right' })
+
 -- window movement
--- these actually rotate all windows, and don't distinguish vertical and horizontal
-keymap.set('n', '◂', '<C-w>R', { desc = 'windows: move left', noremap = true })
-keymap.set('n', '▾', '<C-w>r', { desc = 'windows: move down', noremap = true })
-keymap.set('n', '▴', '<C-w>R', { desc = 'windows: move up', noremap = true })
-keymap.set('n', '▸', '<C-w>r', { desc = 'windows: move right', noremap = true })
+keymap.set('n', '◂', function() require('utils.windows').swap_buffer('h') end, { desc = 'windows: move left', noremap = true })
+keymap.set('n', '▾', function() require('utils.windows').swap_buffer('j') end, { desc = 'windows: move down', noremap = true })
+keymap.set('n', '▴', function() require('utils.windows').swap_buffer('k') end, { desc = 'windows: move up', noremap = true })
+keymap.set('n', '▸', function() require('utils.windows').swap_buffer('l') end, { desc = 'windows: move right', noremap = true })
 
 -- window management
 keymap.set('n', '<leader>h', ':set nosplitright<cr>:vnew<cr>:set splitright<cr>', { desc = 'windows: split left' })
@@ -36,35 +36,8 @@ keymap.set('n', '<leader>uiww', ':set linebreak! wrap!<cr>', { desc = 'toggle wo
 
 keymap.set('n', '<leader>uiln', ':set nornu!<cr>', { desc = 'toggle relative / absolute line numbers' })
 
-local function spaces_to_tabs()
-	local original = vim.o.tabstop
-	local count = (vim.v.count ~= 0) and vim.v.count or original
-
-	vim.o.tabstop = count
-
-	vim.cmd('%retab!')
-
-	vim.o.tabstop = original
-end
-keymap.set('n', '<leader>crstt', spaces_to_tabs, { desc = 'convert spaces to tabs' })
-
-local function tabs_to_spaces()
-	local original_tabstop = vim.o.tabstop
-	local original_shiftwidth = vim.o.shiftwidth
-	local original_expandtab = vim.o.expandtab
-	local count = (vim.v.count ~= 0) and vim.v.count or original_shiftwidth
-
-	vim.o.tabstop = count
-	vim.o.shiftwidth = count
-	vim.o.expandtab = true
-
-	vim.cmd('%retab!')
-
-	vim.o.tabstop = original_tabstop
-	vim.o.shiftwidth = original_shiftwidth
-	vim.o.expandtab = original_expandtab
-end
-keymap.set('n', '<leader>crtts', tabs_to_spaces, { desc = 'convert tabs to spaces' })
+keymap.set({'n', 'x'}, '<leader>crstt', function() require('utils.indentation').spaces_to_tabs() end, { desc = 'convert spaces to tabs' })
+keymap.set({'n', 'x'}, '<leader>crtts', function() require('utils.indentation').tabs_to_spaces() end, { desc = 'convert tabs to spaces' })
 
 keymap.set('n', '<leader>hs', ':set nohlsearch!<cr>', { desc = 'toggle highlight search' })
 keymap.set('n', '<esc>', ':nohlsearch<cr>', { desc = 'unhighlight search', silent = true })
@@ -96,4 +69,3 @@ keymap.set('n', 'N', 'Nzzzv', { desc = 'previous search match' })
 keymap.set('x', '<leader>p', [["_dP]], { desc = 'paste without saving overwritten text in the paste buffer' })
 
 keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>//gc<Left><Left><Left>]], { desc = 'sed current selection' })
-

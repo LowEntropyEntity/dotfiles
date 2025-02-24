@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cmd=$(basename "$0")
-exec uwsm app -- /usr/bin/"$cmd" "$@"
+exec env FZF_DEFAULT_OPTS= uwsm app -- /usr/bin/"$cmd" "$@"

@@ -56,16 +56,17 @@ opt.mouse:append('a')
 
 opt.clipboard:append({'unnamed', 'unnamedplus'})
 local in_dev_container = (os.getenv('DEV_CONTAINER') ~= nil)
+local osc52 = require('vim.ui.clipboard.osc52')
 if in_dev_container then
 	vim.g.clipboard = {
 		name = 'OSC 52',
 		copy = {
-			['+'] = require('vim.ui.clipboard.osc52').copy('+'),
-			['*'] = require('vim.ui.clipboard.osc52').copy('*'),
+			['+'] = osc52.copy('+'),
+			['*'] = osc52.copy('*'),
 		},
 		paste = {
-			['+'] = require('vim.ui.clipboard.osc52').paste('+'),
-			['*'] = require('vim.ui.clipboard.osc52').paste('*'),
+			['+'] = osc52.paste('+'),
+			['*'] = osc52.paste('*'),
 		},
 	}
 end

@@ -749,6 +749,14 @@
             scope: user
           ignore_errors: true
 
+        - name: send clipboard events to tmux
+          systemd_service:
+            name: clipboard-update-tmux
+            enabled: true
+            state: started
+            scope: user
+          ignore_errors: true
+
       become: true
       become_user: "{{ user }}"
 

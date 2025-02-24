@@ -1,0 +1,10 @@
+[Unit]
+Description=watch the wl-clipboard and copy to tmux
+
+[Service]
+ExecStart=/usr/bin/wl-paste --watch tmux load-buffer -
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=default.target

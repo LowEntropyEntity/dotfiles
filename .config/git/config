@@ -133,12 +133,6 @@
 [include]
 	path = ~/.config/delta/themes/themes.gitconfig
 
-[includeIf "gitdir:~/work/"]
-	path = ~/work/.gitconfig
-
-[includeIf "gitdir:~/.dotfiles"]
-	path = ~/.config/git/config.dotfiles
-
 [init]
 	defaultBranch = main
 
@@ -193,3 +187,9 @@
 
 [safe]
 	directory = /opt/flutter
+
+[includeIf "gitdir:~/.dotfiles"]
+	path = ~/.config/git/config.dotfiles
+
+[includeIf "gitdir:~/work/"]
+	path = ~/work/.gitconfig
