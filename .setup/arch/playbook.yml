@@ -529,7 +529,7 @@
         - name: config dotfiles
           git_config:
             name: "includeif.gitdir:~/.dotfiles.path"
-            value: "~/.config/git/config.dotfiles"
+            value: "~/.config/git/dotfiles/config"
           environment:
             GIT_DIR: "{{ lookup('env','DOTFILES_GIT_DIR') | default(user_home_git_dir, true) }}"
           when: dotfiles_clone is changed or not dotfiles.stat.exists
@@ -537,10 +537,6 @@
         - debug:
             msg: "{{ debug.stdout }}"
           when: dotfiles_clone is changed or not dotfiles.stat.exists
-
-        - name: check if home files are downloaded
-          stat: "path={{ user_home_git_dir }}"
-          register: home
 
         - name: import gpg key
           command: gpg --locate-key sean@sean.xyz
@@ -558,14 +554,6 @@
           environment:
             GIT_DIR: "{{ lookup('env','DOTFILES_GIT_DIR') | default(user_dotfiles_git_dir, true) }}"
             GIT_WORK_TREE: "{{ lookup('env','DOTFILES_GIT_WORK_TREE') | default(user_home, true) }}"
-          ignore_errors: true
-          register: debug
-
-        - name: sync home submodules
-          shell: "git submodule update --init"
-          environment:
-            GIT_DIR: "{{ lookup('env','HOME_GIT_DIR') | default(user_home_git_dir, true) }}"
-            GIT_WORK_TREE: "{{ lookup('env','HOME_GIT_WORK_TREE') | default(user_home, true) }}"
           ignore_errors: true
           register: debug
 

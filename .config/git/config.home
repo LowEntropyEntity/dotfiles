@@ -1,8 +1,0 @@
-[alias]
-	grep-all = "!sh -c 'echo \"error: in home\" >&2; exit 1'"
-
-[core]
-	excludesFile = ~/.gitignore.home
-
-[oh-my-zsh]
-	hide-info = 1

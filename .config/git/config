@@ -189,7 +189,10 @@
 	directory = /opt/flutter
 
 [includeIf "gitdir:~/.dotfiles"]
-	path = ~/.config/git/config.dotfiles
+	path = ~/.config/git/dotfiles/config
+
+[includeIf "gitdir:~/.home"]
+	path = ~/config/git/home/config
 
 [includeIf "gitdir:~/work/"]
 	path = ~/work/.gitconfig
